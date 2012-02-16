@@ -5,9 +5,6 @@ use base qw/DBIx::Class/;
 use strict;
 use warnings;
 
-use Data::Dumper::Concise;
-use Data::Printer;
-
 our $VERSION = '0.010000';
 
 sub insert {

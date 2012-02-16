@@ -5,16 +5,10 @@ use base qw/DBIx::Class::Schema/;
 use strict;
 use warnings;
 
-use Data::Dumper::Concise;
-use Data::Printer;
-
 use Class::C3::Componentised ();
 use DBIx::Class::Schema::AuditLog::Structure;
 use Scalar::Util 'blessed';
-use Try::Tiny;
 
-__PACKAGE__->mk_classdata('audit_log_component');
-__PACKAGE__->mk_classdata('audit_log_components');
 __PACKAGE__->mk_classdata('audit_log_connection');
 __PACKAGE__->mk_classdata('audit_log_schema');
 __PACKAGE__->mk_classdata('audit_log_schema_template');
@@ -33,14 +27,11 @@ sub txn_do {
             = $audit_log_schema->_current_changeset_container;
 
         unless ($current_changeset_ref) {
-
-            # this is a hash because scalar refs can't be localized
             $current_changeset_ref = {};
             $audit_log_schema->_current_changeset_container(
                 $current_changeset_ref);
         }
 
-        # wrap the thunk with a new changeset creation
         $code = sub {
             my $changeset
                 = $audit_log_schema->audit_log_create_changeset(@args);
@@ -73,13 +64,8 @@ sub find_or_create_audit_log_schema_template {
     Class::C3::Componentised->inject_base( $class,
         'DBIx::Class::Schema::AuditLog::Structure' );
 
-    $class->load_components( $self->audit_log_components )
-        if $self->audit_log_components;
-
     $schema = $self->audit_log_schema_template(
         $class->compose_namespace( $c . '::AuditLog' ) );
-
-    my $component = $self->audit_log_component || "AuditLog";
 
     my $prefix = 'AuditLog';
     foreach my $audit_log_table (
