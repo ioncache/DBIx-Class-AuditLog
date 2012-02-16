@@ -21,33 +21,35 @@ sub txn_do {
 
     my $code = $user_code;
 
-    my $current_changeset = $audit_log_schema->_current_changeset;
-    if ( !$current_changeset ) {
-        my $current_changeset_ref
-            = $audit_log_schema->_current_changeset_container;
+    my $changeset_data = $args[0];
 
-        unless ($current_changeset_ref) {
-            $current_changeset_ref = {};
-            $audit_log_schema->_current_changeset_container(
-                $current_changeset_ref);
+    if ( $changeset_data->{do_audit} ) {
+        my $current_changeset = $audit_log_schema->_current_changeset;
+        if ( !$current_changeset ) {
+            my $current_changeset_ref
+                = $audit_log_schema->_current_changeset_container;
+    
+            unless ($current_changeset_ref) {
+                $current_changeset_ref = {};
+                $audit_log_schema->_current_changeset_container(
+                    $current_changeset_ref);
+            }
+    
+            $code = sub {
+                my $changeset
+                    = $audit_log_schema->audit_log_create_changeset(@args);
+                local $current_changeset_ref->{changeset} = $changeset->id;
+                $user_code->(@_);
+            };
         }
-
-        $code = sub {
-            my $changeset
-                = $audit_log_schema->audit_log_create_changeset(@args);
-            local $current_changeset_ref->{changeset} = $changeset->id;
-            $user_code->(@_);
-        };
-
-    }
-
-    if ( $audit_log_schema->storage != $self->storage ) {
-        my $inner_code = $code;
-        $code = sub { $audit_log_schema->txn_do( $inner_code, @_ ) };
+    
+        if ( $audit_log_schema->storage != $self->storage ) {
+            my $inner_code = $code;
+            $code = sub { $audit_log_schema->txn_do( $inner_code, @_ ) };
+        }
     }
 
     return $self->next::method( $code, @args );
-
 }
 
 sub find_or_create_audit_log_schema_template {
