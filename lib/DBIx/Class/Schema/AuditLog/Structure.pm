@@ -27,31 +27,30 @@ sub current_changeset {
     $self->throw_exception('Cannot set changeset manually. Use txn_do.')
         if @args;
 
-    my $id = $self->_current_changeset;
+    # we only want to create a changeset if the action (insert/update/delete)
+    # is being run from txn_do -- the txn_do method in
+    # DBIx::Class::Schema::AuditLog sets local
+    # _current_changeset_container->{changeset} &
+    # _current_changeset_container->{args} variables in the scope
+    # of each transaction
+    if (   defined $self->_current_changeset_container
+        && defined $self->_current_changeset_container->{changeset} )
+    {
 
-    #$self->throw_exception(
-    #    'Cannot call current_changeset outside of a transaction.')
-    #    unless $id;
+        my $id = $self->_current_changeset;
 
-    unless ($id) {
-        my $changeset = $self->audit_log_create_changeset(
-            $self->_current_changeset_container->{args} );
-        $self->_current_changeset_container->{changeset} = $changeset->id;
-        $id = $changeset->id;
+        unless ($id) {
+            my $changeset = $self->audit_log_create_changeset(
+                $self->_current_changeset_container->{args} );
+            $self->_current_changeset_container->{changeset} = $changeset->id;
+            $id = $changeset->id;
+        }
+
+        return $id;
     }
 
-    return $id;
+    return;
 }
-
-
-#my $current_changeset_ref
-#    = $audit_log_schema->_current_changeset_container;
-#
-#unless ($current_changeset_ref) {
-#    $current_changeset_ref = {};
-#    $audit_log_schema->_current_changeset_container(
-#        $current_changeset_ref);
-#}
 
 sub audit_log_create_changeset {
     my $self           = shift;
@@ -78,18 +77,26 @@ sub audit_log_create_action {
     my $self        = shift;
     my $action_data = shift;
 
-    my $table = $self->resultset('AuditLogAuditedTable')
-        ->find_or_create( { name => $action_data->{table} } );
+    my $changeset = $self->current_changeset;
 
-    return $self->resultset('AuditLogChangeset')
-        ->find( $self->current_changeset )->create_related(
-        'Action',
-        {   audited_row   => $action_data->{row},
-            audited_table => $table->id,
-            type          => $action_data->{type},
-        }
+    if ($changeset) {
+        my $table = $self->resultset('AuditLogAuditedTable')
+            ->find_or_create( { name => $action_data->{table} } );
+
+        return (
+            $self->resultset('AuditLogChangeset')->find($changeset)
+                ->create_related(
+                'Action',
+                {   audited_row   => $action_data->{row},
+                    audited_table => $table->id,
+                    type          => $action_data->{type},
+                }
+                ),
+            $table
         );
+    }
 
+    return;
 }
 
 1;
