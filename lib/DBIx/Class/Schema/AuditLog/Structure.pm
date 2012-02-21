@@ -29,12 +29,29 @@ sub current_changeset {
 
     my $id = $self->_current_changeset;
 
-    $self->throw_exception(
-        'Cannot call current_changeset outside of a transaction.')
-        unless $id;
+    #$self->throw_exception(
+    #    'Cannot call current_changeset outside of a transaction.')
+    #    unless $id;
+
+    unless ($id) {
+        my $changeset = $self->audit_log_create_changeset(
+            $self->_current_changeset_container->{args} );
+        $self->_current_changeset_container->{changeset} = $changeset->id;
+        $id = $changeset->id;
+    }
 
     return $id;
 }
+
+
+#my $current_changeset_ref
+#    = $audit_log_schema->_current_changeset_container;
+#
+#unless ($current_changeset_ref) {
+#    $current_changeset_ref = {};
+#    $audit_log_schema->_current_changeset_container(
+#        $current_changeset_ref);
+#}
 
 sub audit_log_create_changeset {
     my $self           = shift;

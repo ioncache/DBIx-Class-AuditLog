@@ -14,6 +14,42 @@ __PACKAGE__->mk_classdata('audit_log_schema');
 __PACKAGE__->mk_classdata('audit_log_schema_template');
 __PACKAGE__->mk_classdata('audit_log_storage_type');
 
+=head1 DBIx::Class OVERRIDDEN METHODS
+
+=head2 connection
+
+Overrides the DBIx::Class connection method to create an AuditLog schema.
+
+=cut
+sub connection {
+    my $self = shift;
+
+    my $schema = $self->next::method(@_);
+
+    my $audit_log_schema = ( ref $self || $self )
+        ->find_or_create_audit_log_schema_template->clone;
+
+    if ( $self->audit_log_connection ) {
+        $audit_log_schema->storage_type( $self->audit_log_storage_type )
+            if $self->audit_log_storage_type;
+        $audit_log_schema->connection( @{ $self->audit_log_connection } );
+    }
+    else {
+        $audit_log_schema->storage( $schema->storage );
+    }
+
+    $self->audit_log_schema($audit_log_schema);
+
+    $self->audit_log_schema->storage->disconnect();
+
+    return $schema;
+}
+
+=head2 txn_do
+
+Wraps the DBIx::Class txn_do method with a new changeset whenever required.
+
+=cut
 sub txn_do {
     my ( $self, $user_code, @args ) = @_;
 
@@ -23,35 +59,41 @@ sub txn_do {
 
     my $changeset_data = $args[0];
 
-    if ( $changeset_data->{do_audit} ) {
-        my $current_changeset = $audit_log_schema->_current_changeset;
-        if ( !$current_changeset ) {
-            my $current_changeset_ref
-                = $audit_log_schema->_current_changeset_container;
-    
-            unless ($current_changeset_ref) {
-                $current_changeset_ref = {};
-                $audit_log_schema->_current_changeset_container(
-                    $current_changeset_ref);
-            }
-    
-            $code = sub {
-                my $changeset
-                    = $audit_log_schema->audit_log_create_changeset(@args);
-                local $current_changeset_ref->{changeset} = $changeset->id;
-                $user_code->(@_);
-            };
+    my $current_changeset = $audit_log_schema->_current_changeset;
+    if ( !$current_changeset ) {
+        my $current_changeset_ref
+            = $audit_log_schema->_current_changeset_container;
+
+        unless ($current_changeset_ref) {
+            $current_changeset_ref = {};
+            $audit_log_schema->_current_changeset_container(
+                $current_changeset_ref);
         }
-    
-        if ( $audit_log_schema->storage != $self->storage ) {
-            my $inner_code = $code;
-            $code = sub { $audit_log_schema->txn_do( $inner_code, @_ ) };
-        }
+
+        $code = sub {
+            # creates local variables in the transaction scope to store
+            # the changset args, and the changeset id
+            local $current_changeset_ref->{args}      = $args[0];
+            local $current_changeset_ref->{changeset} = '';
+            $user_code->(@_);
+        };
+    }
+
+    if ( $audit_log_schema->storage != $self->storage ) {
+        my $inner_code = $code;
+        $code = sub { $audit_log_schema->txn_do( $inner_code, @_ ) };
     }
 
     return $self->next::method( $code, @args );
 }
 
+=head1 HELPER METHODS
+
+=head2 find_or_create_audit_log_schema_template
+
+Finds or creates a new schema object using the AuditLog tables.
+
+=cut
 sub find_or_create_audit_log_schema_template {
     my $self = shift;
 
@@ -81,30 +123,6 @@ sub find_or_create_audit_log_schema_template {
         $schema->register_class( $prefix . $audit_log_table, $class );
 
     }
-
-    return $schema;
-}
-
-sub connection {
-    my $self = shift;
-
-    my $schema = $self->next::method(@_);
-
-    my $audit_log_schema = ( ref $self || $self )
-        ->find_or_create_audit_log_schema_template->clone;
-
-    if ( $self->audit_log_connection ) {
-        $audit_log_schema->storage_type( $self->audit_log_storage_type )
-            if $self->audit_log_storage_type;
-        $audit_log_schema->connection( @{ $self->audit_log_connection } );
-    }
-    else {
-        $audit_log_schema->storage( $schema->storage );
-    }
-
-    $self->audit_log_schema($audit_log_schema);
-
-    $self->audit_log_schema->storage->disconnect();
 
     return $schema;
 }

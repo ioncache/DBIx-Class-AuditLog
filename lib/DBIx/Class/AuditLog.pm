@@ -7,6 +7,11 @@ use warnings;
 
 our $VERSION = '0.010000';
 
+=head1 DBIx::Class OVERRIDDEN METHODS
+
+=head2 insert
+
+=cut
 sub insert {
     my $self = shift;
 
@@ -34,6 +39,9 @@ sub insert {
 
 }
 
+=head2 update
+
+=cut
 sub update {
     my $self = shift;
 
@@ -59,6 +67,9 @@ sub update {
     return $self->next::method(@_);
 }
 
+=head2 delete
+
+=cut
 sub delete {
     my $self = shift;
 
@@ -83,11 +94,28 @@ sub delete {
     return $self->next::method(@_);
 }
 
+=head1 HELPER METHODS
+
+=head2 _audit_log_schema
+
+Returns the AuditLog schema from storage.
+
+=cut
+
 sub _audit_log_schema {
     my $self = shift;
     return $self->result_source->schema->audit_log_schema;
 }
 
+=head2 _action_setup
+
+Creates a new AuditLog Action for a specific type.
+
+Requires:
+    row: primary key of the table that is being audited
+    type: action type, 1 of insert/update/delete
+
+=cut
 sub _action_setup {
     my $self = shift;
     my $row  = shift;
