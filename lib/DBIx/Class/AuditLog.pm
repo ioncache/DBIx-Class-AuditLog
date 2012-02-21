@@ -5,6 +5,8 @@ use base qw/DBIx::Class/;
 use strict;
 use warnings;
 
+use Data::Printer;
+
 our $VERSION = '0.010000';
 
 =head1 DBIx::Class OVERRIDDEN METHODS
@@ -49,6 +51,16 @@ sub update {
 
     my $stored_row = $self->get_from_storage;
 
+    # find the list of passed in update values when $row->update({...}) is used
+    my $updated_column_set = $_[0];
+
+    # add any values from $row->update({...}) to the dirty_column list
+    # any columns changed via $row->columnName(...) get added to this
+    # list automatically
+    foreach my $updated_column ( keys %{$updated_column_set}) {
+        $self->make_column_dirty($updated_column);
+    }
+
     my %dirty_columns = $self->get_dirty_columns;
 
     my ( $action, $table ) = $self->_action_setup( $stored_row, 'update' );
@@ -68,7 +80,7 @@ sub update {
         }
     }
 
-    return $self->next::method(@_);
+    return $self->next::method(@_)
 }
 
 =head2 delete
