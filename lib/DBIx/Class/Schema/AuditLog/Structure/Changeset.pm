@@ -19,8 +19,9 @@ __PACKAGE__->add_columns(
         'size'        => 255,
     },
     'timestamp' => {
-        'data_type'   => 'timestamp',
-        'is_nullable' => 0,
+        'data_type'     => 'timestamp',
+        'default_value' => 'CURRENT_TIMESTAMP',
+        'is_nullable'   => 0,
     },
     'user' => {
         'data_type'   => 'integer',
