@@ -56,7 +56,7 @@ sub update {
     # any columns changed via $row->columnName(...) get added to this
     # list automatically
     foreach my $updated_column ( keys %{$updated_column_set}) {
-        $self->make_column_dirty($updated_column);
+        $self->$updated_column($updated_column_set->{$updated_column});
     }
 
     my %dirty_columns = $self->get_dirty_columns;
