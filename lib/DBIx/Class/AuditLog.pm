@@ -12,6 +12,7 @@ our $VERSION = '0.010000';
 =head2 insert
 
 =cut
+
 sub insert {
     my $self = shift;
 
@@ -21,18 +22,18 @@ sub insert {
 
     my ( $action, $table ) = $self->_action_setup( $result, 'insert' );
 
-    if ( $action ) {
+    if ($action) {
         my %column_data = $result->get_columns;
-        $self->_store_changes($action, {}, \%column_data);    
+        $self->_store_changes( $action, $table, {}, \%column_data );
     }
 
     return $result;
-
 }
 
 =head2 update
 
 =cut
+
 sub update {
     my $self = shift;
 
@@ -40,23 +41,25 @@ sub update {
 
     my ( $action, $table ) = $self->_action_setup( $stored_row, 'update' );
 
-    if ( $action ) {
-        my %old_data = $stored_row->get_columns;
+    if ($action) {
+        my %old_data      = $stored_row->get_columns;
         my %dirty_columns = $self->get_dirty_columns;
-        
-        # find the list of passed in update values when $row->update({...}) is used
+
+   # find the list of passed in update values when $row->update({...}) is used
         if ( my $updated_column_set = $_[0] ) {
-            @dirty_columns{keys %$updated_column_set} = values %$updated_column_set;
+            @dirty_columns{ keys %$updated_column_set }
+                = values %$updated_column_set;
         }
-        $self->_store_changes($action, \%old_data, \%dirty_columns);    
+        $self->_store_changes( $action, $table, \%old_data, \%dirty_columns );
     }
 
-    return $self->next::method(@_)
+    return $self->next::method(@_);
 }
 
 =head2 delete
 
 =cut
+
 sub delete {
     my $self = shift;
 
@@ -64,9 +67,9 @@ sub delete {
 
     my ( $action, $table ) = $self->_action_setup( $stored_row, 'delete' );
 
-    if ( $action ) {
+    if ($action) {
         my %old_data = $stored_row->get_columns;
-        $self->_store_changes($action, \%old_data, {});    
+        $self->_store_changes( $action, $table, \%old_data, {} );
     }
 
     return $self->next::method(@_);
@@ -94,21 +97,19 @@ Requires:
     type: action type, 1 of insert/update/delete
 
 =cut
+
 sub _action_setup {
     my $self = shift;
     my $row  = shift;
     my $type = shift;
-    
-    my ($action, $table);
 
-    ($action, $table) = $self->_audit_log_schema->audit_log_create_action(
+    return $self->_audit_log_schema->audit_log_create_action(
         {   row   => $row->id,
             table => $row->result_source_instance->name,
             type  => $type,
         }
     );
 
-    return ( $action, $table );
 }
 
 =head2 _store_changes
@@ -121,22 +122,25 @@ Requires:
     new_values: the new values that are replacing the old
 
 =cut
+
 sub _store_changes {
-    my $self = shift;
-    
-    my $action = shift;
+    my $self       = shift;
+    my $action     = shift;
+    my $table      = shift;
     my $old_values = shift;
     my $new_values = shift;
-    
+
     foreach my $column ( keys %$new_values || keys %$old_values ) {
-        my $field
-            = $table->find_or_create_related( 'Field', { name => $column } );
+        my $field = $table->find_or_create_related( 'Field',
+            { name => $column } );
+
         $action->create_related(
             'Change',
             {   field     => $field->id,
-                new_value => $result->$column,
+                new_value => $new_values->{$column},
+                old_value => $old_values->{$column},
             }
-        );        
+        );
     }
 }
 

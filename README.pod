@@ -62,7 +62,7 @@ Currently this table does not get a relationship to any table in your main schem
 
 =item Changeset
 
-A L<Changeset|DBIx::Class::AuditLog::Schema::Structure::Changeset> is an identifier for a transaction.  It can have many L<Actions||DBIx::Class::AuditLog::Schema::Structure::Action>.  It can optionally be owned by a L<User|DBIx::Class::AuditLog::Schema::Structure::User>.  And optionally have a description.
+A L<Changeset|DBIx::Class::AuditLog::Schema::Structure::Changeset> is an identifier for a transaction.  It can have many L<Actions|DBIx::Class::AuditLog::Schema::Structure::Action>.  It can optionally be owned by a L<User|DBIx::Class::AuditLog::Schema::Structure::User>.  And optionally have a description.
 
 =item Action
 
