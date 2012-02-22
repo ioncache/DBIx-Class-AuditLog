@@ -7,7 +7,7 @@ DBIx::Class::AuditLog - Simple activity audit logging for DBIx::Class
 Enable the AuditLog schema component in your L<DBIx::Class::Schema> class file:
 
  package My::Schema;
- use base 'DBIx::Class::Schema';
+ use base qw/DBIx::Class::Schema/;
 
  __PACKAGE__->load_components(qw/Schema::AuditLog/);
 
@@ -20,7 +20,7 @@ Enable the AuditLog component in your the individual L<DBIx::Class> table class 
 
 In your application wrap any insert/update/delete in a transaction to have audit logging activated:
 
-  $schema->txn_do(
+  $my_schema->txn_do(
     sub {
       $my_row->update({ ... });
     }
@@ -28,7 +28,7 @@ In your application wrap any insert/update/delete in a transaction to have audit
 
 Optionally pass an extra hashref to the txn_do method to indicate a user and/or a description for the transaction:
 
-  $schema->txn_do(
+  $my_schema->txn_do(
     sub {
       $my_row->update({ ... });
     },
@@ -46,11 +46,9 @@ Optionally pass an extra hashref to the txn_do method to indicate a user and/or 
 
 =over 4
 
-=item *
+=item * L<DBIx::Class>
 
-L<DBIx::Class>
-
-L<DBIx::Class::Journal>
+=item * L<DBIx::Class::Journal>
 
 =back
 
