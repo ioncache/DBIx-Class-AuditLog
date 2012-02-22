@@ -18,7 +18,7 @@ Enable the AuditLog component in your the individual L<DBIx::Class> table class 
  
  __PACKAGE__->load_components(qw/AuditLog/);
 
-In your application wrap any insert/update/delete in a transaction to have audit logging actiavted:
+In your application wrap any insert/update/delete in a transaction to have audit logging activated:
 
   $schema->txn_do(
     sub {
@@ -26,7 +26,7 @@ In your application wrap any insert/update/delete in a transaction to have audit
     }
   )
 
-Optionally pass an extra hashref to the txn_do method to indicate a user and/or a description for audit:
+Optionally pass an extra hashref to the txn_do method to indicate a user and/or a description for the transaction:
 
   $schema->txn_do(
     sub {
