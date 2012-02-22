@@ -20,25 +20,61 @@ Enable the AuditLog component in your the individual L<DBIx::Class> table class 
 
 In your application wrap any insert/update/delete in a transaction to have audit logging activated:
 
-  $my_schema->txn_do(
-    sub {
-      $my_row->update({ ... });
-    }
-  )
+    $my_schema->txn_do(
+        sub {
+            $my_row->update({ ... });
+        }
+    );
 
 Optionally pass an extra hashref to the txn_do method to indicate a user and/or a description for the transaction:
 
-  $my_schema->txn_do(
-    sub {
-      $my_row->update({ ... });
-    },
-    {
-      user => 'username_or_id',
-      description => 'description of transaction',
-    }
-  )
+    $my_schema->txn_do(
+        sub {
+            $my_row->update({ ... });
+        },
+        {
+            user => 'username_or_id',
+            description => 'description of transaction'
+        }
+    );
 
 =head1 DESCRIPTION
+
+DBIx::Class::AuditLog is meant for tracking changes made to specific tables in your database.
+
+Any insert/update/delete that requires auditing must be wrapped in a L<"txn_do"|DBIx::Class::Schema/"txn_do"> statement.
+
+Transactions are saved as Changesets.  Each Changeset can have many Actions.  An Action can be of type insert/update/delete.  Actions can have many Changes. Changes show the data that was changed during an action.
+
+=head1 TABLE STRUCTURE
+
+The AuditLog schema is a self-contained schema that keeps no relationships to your main schema.
+
+The AuditLog schema consists of 6 tables:
+
+=over 4
+
+=item User
+
+This table contains a unique list of users that have executed transactions.  The 'name' field is used to store the User identifier.  This could be used for a user's name or id or other unique identifier as needed.
+
+Currently this table does not get a relationship to any table in your main schema.
+
+=item Changeset
+
+A L<Changeset|DBIx::Class::AuditLog::Schema::Structure::Changeset> is an identifier for a transaction.  It can have many L<Actions||DBIx::Class::AuditLog::Schema::Structure::Action>.  It can optionally be owned by a L<User|DBIx::Class::AuditLog::Schema::Structure::User>.  And optionally have a description.
+
+=item Action
+
+An L<Action||DBIx::Class::AuditLog::Schema::Structure::Action> is an insert/update/delete belonging to a L<Changeset||DBIx::Class::AuditLog::Schema::Structure::Changeset>.  It is also owned by L<Table|DBIx::Class::AuditLog::Schema::Structure::Table>.
+
+=item Change
+
+=item Table
+
+=item Field
+
+=back
 
 =head1 DEPLOYMENT
 
