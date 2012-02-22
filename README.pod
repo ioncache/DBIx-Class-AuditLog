@@ -1,0 +1,67 @@
+=head1 NAME
+
+DBIx::Class::AuditLog - Simple activity audit logging for DBIx::Class
+
+=head1 SYNOPSIS
+
+Enable the AuditLog schema component in your L<DBIx::Class::Schema> class file:
+
+ package My::Schema;
+ use base 'DBIx::Class::Schema';
+
+ __PACKAGE__->load_components(qw/Schema::AuditLog/);
+
+Enable the AuditLog component in your the individual L<DBIx::Class> table class files that you want to enable logging on:
+
+ package My::Schema::Result::Table
+ use base qw/DBIx::Class::Core/;
+ 
+ __PACKAGE__->load_components(qw/AuditLog/);
+
+In your application wrap any insert/update/delete in a transaction to have audit logging actiavted:
+
+  $schema->txn_do(
+    sub {
+      $my_row->update({ ... });
+    }
+  )
+
+Optionally pass an extra hashref to the txn_do method to indicate a user and/or a description for audit:
+
+  $schema->txn_do(
+    sub {
+      $my_row->update({ ... });
+    },
+    {
+      user => 'username_or_id',
+      description => 'description of transaction',
+    }
+  )
+
+=head1 DESCRIPTION
+
+=head1 DEPLOYMENT
+
+=head1 SEE ALSO
+
+=over 4
+
+=item *
+
+L<DBIx::Class>
+
+L<DBIx::Class::Journal>
+
+=back
+
+=head1 AUTHOR
+
+Mark Jubenville <ioncache@gmail.com>
+
+=head1 COPYRIGHT AND LICENCE
+
+This software is copyright (c) 2010 by Mark Jubenville.
+
+This is free software; you can redistribute it and/or modify it under the same terms as the Perl 5 programming language system itself.
+
+=cut
