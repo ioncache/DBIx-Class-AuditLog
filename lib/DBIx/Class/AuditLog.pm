@@ -23,18 +23,7 @@ sub insert {
 
     if ( $action ) {
         my %column_data = $result->get_columns;
-    
-        foreach my $column ( keys %column_data ) {
-            my $field
-                = $table->find_or_create_related( 'Field', { name => $column } );
-    
-            $action->create_related(
-                'Change',
-                {   field     => $field->id,
-                    new_value => $result->$column,
-                }
-            );
-        }
+        $self->_store_changes($action, {}, \%column_data);    
     }
 
     return $result;
@@ -49,33 +38,17 @@ sub update {
 
     my $stored_row = $self->get_from_storage;
 
-    # find the list of passed in update values when $row->update({...}) is used
-    my $updated_column_set = $_[0];
-
-    # add any values from $row->update({...}) to the dirty_column list
-    # any columns changed via $row->columnName(...) get added to this
-    # list automatically
-    foreach my $updated_column ( keys %{$updated_column_set}) {
-        $self->$updated_column($updated_column_set->{$updated_column});
-    }
-
-    my %dirty_columns = $self->get_dirty_columns;
-
     my ( $action, $table ) = $self->_action_setup( $stored_row, 'update' );
 
     if ( $action ) {
-        foreach my $column ( keys %dirty_columns ) {
-            my $field
-                = $table->find_or_create_related( 'Field', { name => $column } );
-    
-            $action->create_related(
-                'Change',
-                {   field     => $field->id,
-                    old_value => $stored_row->$column,
-                    new_value => $dirty_columns{$column},
-                }
-            );
+        my %old_data = $stored_row->get_columns;
+        my %dirty_columns = $self->get_dirty_columns;
+        
+        # find the list of passed in update values when $row->update({...}) is used
+        if ( my $updated_column_set = $_[0] ) {
+            @dirty_columns{keys %$updated_column_set} = values %$updated_column_set;
         }
+        $self->_store_changes($action, \%old_data, \%dirty_columns);    
     }
 
     return $self->next::method(@_)
@@ -92,19 +65,8 @@ sub delete {
     my ( $action, $table ) = $self->_action_setup( $stored_row, 'delete' );
 
     if ( $action ) {
-        my %column_data = $stored_row->get_columns;
-    
-        foreach my $column ( keys %column_data ) {
-            my $field
-                = $table->find_or_create_related( 'Field', { name => $column } );
-    
-            $action->create_related(
-                'Change',
-                {   field     => $field->id,
-                    old_value => $stored_row->$column,
-                }
-            );
-        }
+        my %old_data = $stored_row->get_columns;
+        $self->_store_changes($action, \%old_data, {});    
     }
 
     return $self->next::method(@_);
@@ -147,6 +109,35 @@ sub _action_setup {
     );
 
     return ( $action, $table );
+}
+
+=head2 _store_changes
+
+Store the column data that has changed
+
+Requires:
+    action: the action object that has associated changes
+    old_values: the old values are being replaced
+    new_values: the new values that are replacing the old
+
+=cut
+sub _store_changes {
+    my $self = shift;
+    
+    my $action = shift;
+    my $old_values = shift;
+    my $new_values = shift;
+    
+    foreach my $column ( keys %$new_values || keys %$old_values ) {
+        my $field
+            = $table->find_or_create_related( 'Field', { name => $column } );
+        $action->create_related(
+            'Change',
+            {   field     => $field->id,
+                new_value => $result->$column,
+            }
+        );        
+    }
 }
 
 1;
