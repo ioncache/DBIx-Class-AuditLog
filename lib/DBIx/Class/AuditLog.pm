@@ -45,11 +45,12 @@ sub update {
         my %old_data      = $stored_row->get_columns;
         my %dirty_columns = $self->get_dirty_columns;
 
-   # find the list of passed in update values when $row->update({...}) is used
+        # find the list of passed in update values when $row->update({...}) is used
         if ( my $updated_column_set = $_[0] ) {
             @dirty_columns{ keys %$updated_column_set }
                 = values %$updated_column_set;
         }
+
         $self->_store_changes( $action, $table, \%old_data, \%dirty_columns );
     }
 
@@ -130,9 +131,11 @@ sub _store_changes {
     my $old_values = shift;
     my $new_values = shift;
 
-    foreach my $column ( keys %$new_values || keys %$old_values ) {
-        my $field = $table->find_or_create_related( 'Field',
-            { name => $column } );
+    foreach my $column (
+        keys %{$new_values} ? keys %{$new_values} : keys %{$old_values} )
+    {
+        my $field
+            = $table->find_or_create_related( 'Field', { name => $column } );
 
         $action->create_related(
             'Change',
