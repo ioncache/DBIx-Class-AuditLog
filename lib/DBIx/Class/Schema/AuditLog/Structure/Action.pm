@@ -35,6 +35,12 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key('id');
 
 __PACKAGE__->belongs_to(
+    'Changeset',
+    'DBIx::Class::Schema::AuditLog::Structure::Changeset',
+    { 'foreign.id' => 'self.changeset' },
+);
+
+__PACKAGE__->belongs_to(
     'AuditedTable',
     'DBIx::Class::Schema::AuditLog::Structure::AuditedTable',
     { 'foreign.id' => 'self.audited_table' },
