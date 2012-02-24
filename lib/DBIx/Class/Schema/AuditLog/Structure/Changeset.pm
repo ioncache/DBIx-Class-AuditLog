@@ -20,7 +20,7 @@ __PACKAGE__->add_columns(
     },
     'timestamp' => {
         'data_type'     => 'timestamp',
-        'default_value' => 'CURRENT_TIMESTAMP',
+        'default_value' => \'CURRENT_TIMESTAMP()',
         'is_nullable'   => 0,
     },
     'user' => {
