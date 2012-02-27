@@ -38,29 +38,28 @@ sub update {
     my $self = shift;
 
     my $stored_row = $self->get_from_storage;
-
-    my %old_data      = $stored_row->get_columns;
-    my %dirty_columns = $self->get_dirty_columns;
+    my %old_data   = $stored_row->get_columns;
+    my %new_data   = $self->get_dirty_columns;
 
     my $result = $self->next::method(@_);
 
-    # find the list of passed in update values when $row->update({...}) is used
+    # find list of passed in update values when $row->update({...}) is used
     if ( my $updated_column_set = $_[0] ) {
-        @dirty_columns{ keys %$updated_column_set }
-            = values %$updated_column_set;
+        @new_data{ keys %$updated_column_set } = values %$updated_column_set;
     }
 
-    foreach my $key ( keys %dirty_columns ) {
-        if ( $old_data{$key} eq $dirty_columns{$key} ) {
-            delete $dirty_columns{$key};
+    foreach my $key ( keys %new_data ) {
+        if ( $old_data{$key} eq $new_data{$key} ) {
+            delete $new_data{$key};
         }
     }
 
-    if ( keys %dirty_columns ) {
-        my ( $action, $table ) = $self->_action_setup( $stored_row, 'update' );
-    
+    if ( keys %new_data ) {
+        my ( $action, $table )
+            = $self->_action_setup( $stored_row, 'update' );
+
         if ($action) {
-            $self->_store_changes( $action, $table, \%old_data, \%dirty_columns );
+            $self->_store_changes( $action, $table, \%old_data, \%new_data );
         }
     }
 
