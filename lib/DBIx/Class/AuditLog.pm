@@ -49,7 +49,10 @@ sub update {
     }
 
     foreach my $key ( keys %new_data ) {
-        if ( defined $old_data{$key} && $old_data{$key} eq $new_data{$key} ) {
+        if (   defined $old_data{$key}
+            && defined $new_data{$key}
+            && $old_data{$key} eq $new_data{$key} )
+        {
             delete $new_data{$key};
         }
     }
