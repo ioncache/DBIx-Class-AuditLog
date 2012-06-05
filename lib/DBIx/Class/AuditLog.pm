@@ -135,7 +135,7 @@ Requires:
     action: the action object that has associated changes
     old_values: the old values are being replaced
     new_values: the new values that are replacing the old
-
+    table: dbic object of the audit_log_table object
 =cut
 
 sub _store_changes {
@@ -148,17 +148,36 @@ sub _store_changes {
     foreach my $column (
         keys %{$new_values} ? keys %{$new_values} : keys %{$old_values} )
     {
-        my $field
-            = $table->find_or_create_related( 'Field', { name => $column } );
+        if ( $self->_do_audit($column) ) {
+            my $field
+                = $table->find_or_create_related( 'Field', { name => $column } );
 
-        $action->create_related(
-            'Change',
-            {   field     => $field->id,
-                new_value => $new_values->{$column},
-                old_value => $old_values->{$column},
-            }
-        );
+            $action->create_related(
+                'Change',
+                {   field     => $field->id,
+                    new_value => $new_values->{$column},
+                    old_value => $old_values->{$column},
+                }
+            );
+        }
     }
+}
+
+=head2 _do_audit
+
+Returns 1 or 0 if the column should be audited or not.
+
+Requires:
+    column: the name of the column/field to check
+
+=cut
+
+sub _do_audit {
+    my $self = shift;
+    my $column = shift;
+
+    my $info = $self->column_info($column);
+    return defined $info->{audit_log_column} && $info->{audit_log_column} == 0 ? 0 : 1;
 }
 
 1;
