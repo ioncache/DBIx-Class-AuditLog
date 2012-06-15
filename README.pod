@@ -6,17 +6,17 @@ DBIx::Class::AuditLog - Simple activity audit logging for DBIx::Class
 
 Enable the AuditLog schema component in your L<DBIx::Class::Schema> class file:
 
- package My::Schema;
- use base qw/DBIx::Class::Schema/;
+    package My::Schema;
+    use base qw/DBIx::Class::Schema/;
 
- __PACKAGE__->load_components(qw/Schema::AuditLog/);
+    __PACKAGE__->load_components(qw/Schema::AuditLog/);
 
 Enable the AuditLog component in your the individual L<DBIx::Class> table class files that you want to enable logging on:
 
- package My::Schema::Result::Table
- use base qw/DBIx::Class::Core/;
+    package My::Schema::Result::Table
+    use base qw/DBIx::Class::Core/;
  
- __PACKAGE__->load_components(qw/AuditLog/);
+    __PACKAGE__->load_components(qw/AuditLog/);
 
 In your application wrap any insert/update/delete in a transaction to have audit logging activated:
 
@@ -58,21 +58,29 @@ The AuditLog schema consists of 6 tables:
 
 This table contains a unique list of users that have executed transactions.  The 'name' field is used to store the User identifier.  This could be used for a user's name or id or other unique identifier as needed.
 
-Currently this table does not get a relationship to any table in your main schema.
+This table does not get a relationship to any table in your main schema.
 
 =item Changeset
 
-A L<Changeset|DBIx::Class::AuditLog::Schema::Structure::Changeset> is an identifier for a transaction.  It can have many L<Actions|DBIx::Class::AuditLog::Schema::Structure::Action>.  It can optionally be owned by a L<User|DBIx::Class::AuditLog::Schema::Structure::User>.  And optionally have a description.
+An L<AuditLogChangeset|DBIx::Class::AuditLog::Schema::Structure::Changeset> is an identifier for a transaction.  It can have many L<Actions|DBIx::Class::AuditLog::Schema::Structure::Action>.  It can optionally be owned by a L<User|DBIx::Class::AuditLog::Schema::Structure::User>.  And optionally have a description.
 
 =item Action
 
-An L<Action||DBIx::Class::AuditLog::Schema::Structure::Action> is an insert/update/delete belonging to a L<Changeset||DBIx::Class::AuditLog::Schema::Structure::Changeset>.  It is also owned by L<Table|DBIx::Class::AuditLog::Schema::Structure::Table>.
+An L<AuditLogAction|DBIx::Class::AuditLog::Schema::Structure::Action> is an insert/update/delete belonging to a L<Changeset|DBIx::Class::AuditLog::Schema::Structure::Changeset>.  It is also owned by L<Table|DBIx::Class::AuditLog::Schema::Structure::AuditedTable>.
 
 =item Change
 
-=item Table
+An L<AuditLogChange|DBIx::Class::AuditLog::Schema::Structure::Change> contains changed data for one AuditLogField in an AuditLogAction.  The original value is stored in the old_value field and the new value is stored in the new_value field.
+
+=item AuditedTable
+
+An L<AuditLogAuditedTable|DBIx::Class::AuditLog::Schema::Structure::AuditedTable> contains a unique list of tables that are being tracked.  The name field contains the name of a table from your database.  AuditLogAuditedTable rows are added as needed whenever an insert/update/date occurs.
+
+Note: at least for DB2, the table name has the schema name added as well, eg., myschema.foo for the foo table in schema myschema.
 
 =item Field
+
+An L<AuditLogField|DBIx::Class::AuditLog::Schema::Structure::Field> contains a unique list of fields for each table that is being audited.  The name field contains the name of a field from a specific table inyour database.  AuditLogField rows are added as needed whenever an insert/update/date occurs.
 
 =back
 
