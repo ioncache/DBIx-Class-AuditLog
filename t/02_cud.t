@@ -35,7 +35,7 @@ my $al_user = $al_schema->resultset('AuditLogUser')
 isa_ok(
     $al_user->Changeset->first,
     "DBIx::Class::Schema::AuditLog::Structure::Changeset",
-    "Changeset found for CREATE"
+    "Changeset found after CREATE"
 );
 subtest 'CREATE Tests' => sub {
     ok( $al_user->Changeset->first->description eq
@@ -71,7 +71,7 @@ $al_user = $al_schema->resultset('AuditLogUser')
 isa_ok(
     $al_user->Changeset->first,
     "DBIx::Class::Schema::AuditLog::Structure::Changeset",
-    "Changeset found for UPDATE"
+    "Changeset found after UPDATE"
 );
 subtest 'UPDATE Tests' => sub {
     ok( $al_user->Changeset->first->description eq
@@ -109,7 +109,7 @@ $al_user = $al_schema->resultset('AuditLogUser')
 isa_ok(
     $al_user->Changeset->first,
     "DBIx::Class::Schema::AuditLog::Structure::Changeset",
-    "Changeset found for UPDATE"
+    "Changeset found after DELETE"
 );
 subtest 'DELETE Tests' => sub {
     ok( $al_user->Changeset->first->description eq
