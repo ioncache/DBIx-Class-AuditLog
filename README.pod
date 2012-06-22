@@ -33,8 +33,8 @@ Optionally pass an extra hashref to the txn_do method to indicate a user and/or 
             $my_row->update({ ... });
         },
         {
-            user => 'username_or_id',
-            description => 'description of transaction'
+            user => 'username_or_id', # optional
+            description => 'description of transaction' # optional
         }
     );
 
@@ -52,6 +52,17 @@ The AuditLog schema is a self-contained schema that keeps no relationships to yo
 
 The AuditLog schema consists of 6 tables:
 
+    +-------------------------+
+    | Tables_audit_log_schema |
+    +-------------------------+
+    | audit_log_action        |
+    | audit_log_change        |
+    | audit_log_changeset     |
+    | audit_log_field         |
+    | audit_log_table         |
+    | audit_log_user          |
+    +-------------------------+
+
 =over 4
 
 =item User
@@ -60,31 +71,142 @@ This table contains a unique list of users that have executed transactions.  The
 
 This table does not get a relationship to any table in your main schema.
 
+    mysql> select * from audit_log_user order by id;
+    +----+---------------------+
+    | id | name                |
+    +----+---------------------+
+    |  1 | TestAdminUser       |
+    |  2 | YetAnotherAdminUser |
+    |  3 | ioncache            |
+    |  4 | markj               |
+    +----+---------------------+
+    4 rows in set (0.01 sec)
+    
 =item Changeset
 
 An L<AuditLogChangeset|DBIx::Class::AuditLog::Schema::Structure::Changeset> is an identifier for a transaction.  It can have many L<Actions|DBIx::Class::AuditLog::Schema::Structure::Action>.  It can optionally be owned by a L<User|DBIx::Class::AuditLog::Schema::Structure::User>.  And optionally have a description.
+
+    mysql> select * from audit_log_changeset order by id;
+    +----+----------------------------------------------+---------------------+------+
+    | id | description                                  | timestamp           | user |
+    +----+----------------------------------------------+---------------------+------+
+    |  1 | adding new user: JohnSample                  | 2012-06-22 17:16:25 |    1 |
+    |  2 | updating username: JaneSample                | 2012-06-22 17:16:25 |    1 |
+    |  3 | delete user: JohnSample                      | 2012-06-22 17:16:25 |    2 |
+    |  4 | adding new user: TehPwnerer -- no admin user | 2012-06-22 17:16:25 | NULL |
+    |  5 | multi-action changeset                       | 2012-06-22 17:16:25 |    3 |
+    |  6 | NULL                                         | 2012-06-22 17:16:25 |    4 |
+    +----+----------------------------------------------+---------------------+------+
+    6 rows in set (0.00 sec)
 
 =item Action
 
 An L<AuditLogAction|DBIx::Class::AuditLog::Schema::Structure::Action> is an insert/update/delete belonging to a L<Changeset|DBIx::Class::AuditLog::Schema::Structure::Changeset>.  It is also owned by L<Table|DBIx::Class::AuditLog::Schema::Structure::AuditedTable>.
 
+    mysql> select * from audit_log_action order by id;
+    +----+-----------+---------------+-------------+--------+
+    | id | changeset | audited_table | audited_row | type   |
+    +----+-----------+---------------+-------------+--------+
+    |  1 |         1 |             1 |           8 | insert |
+    |  2 |         2 |             1 |           7 | update |
+    |  3 |         3 |             1 |           7 | delete |
+    |  4 |         4 |             1 |           9 | insert |
+    |  5 |         5 |             1 |          10 | insert |
+    |  6 |         5 |             1 |          11 | insert |
+    |  7 |         5 |             1 |          11 | update |
+    |  8 |         5 |             1 |           9 | update |
+    |  9 |         6 |             1 |          13 | insert |
+    | 10 |         6 |             1 |          13 | update |
+    +----+-----------+---------------+-------------+--------+
+    10 rows in set (0.00 sec)
+
 =item Change
 
 An L<AuditLogChange|DBIx::Class::AuditLog::Schema::Structure::Change> contains changed data for one AuditLogField in an AuditLogAction.  The original value is stored in the old_value field and the new value is stored in the new_value field.
+
+    mysql> select * from audit_log_change order by id;
+    +----+--------+-------+--------------+--------------+
+    | id | action | field | old_value    | new_value    |
+    +----+--------+-------+--------------+--------------+
+    |  1 |      1 |     1 | NULL         | JohnSample   |
+    |  2 |      1 |     2 | NULL         | 8            |
+    |  3 |      1 |     3 | NULL         | 999-888-7777 |
+    |  4 |      3 |     1 | JohnSample   | NULL         |
+    |  5 |      3 |     2 | 7            | NULL         |
+    |  6 |      3 |     3 | 999-888-7777 | NULL         |
+    |  7 |      4 |     1 | NULL         | TehPnwerer   |
+    |  8 |      4 |     2 | NULL         | 9            |
+    |  9 |      4 |     3 | NULL         | 999-888-7777 |
+    | 10 |      5 |     1 | NULL         | Superman     |
+    | 11 |      5 |     2 | NULL         | 10           |
+    | 12 |      5 |     3 | NULL         | 123-456-7890 |
+    | 13 |      6 |     1 | NULL         | Spiderman    |
+    | 14 |      6 |     2 | NULL         | 11           |
+    | 15 |      6 |     3 | NULL         | 987-654-3210 |
+    | 16 |      8 |     1 | TehPnwerer   | TehPwnerer   |
+    | 17 |      8 |     3 | 999-888-7777 | 416-123-4567 |
+    | 18 |      9 |     1 | NULL         | Drunk Hulk   |
+    | 19 |      9 |     2 | NULL         | 13           |
+    | 20 |      9 |     3 | NULL         | 123-456-7890 |
+    +----+--------+-------+--------------+--------------+
+    20 rows in set (0.00 sec)
 
 =item AuditedTable
 
 An L<AuditLogAuditedTable|DBIx::Class::AuditLog::Schema::Structure::AuditedTable> contains a unique list of tables that are being tracked.  The name field contains the name of a table from your database.  AuditLogAuditedTable rows are added as needed whenever an insert/update/date occurs.
 
-Note: at least for DB2, the table name has the schema name added as well, eg., myschema.foo for the foo table in schema myschema.
+Note: at least for DB2, the table name will have the schema name added as well, eg., myschema.foo for the foo table in schema myschema.
+
+    mysql> select * from audit_log_table order by id;
+    +----+------+
+    | id | name |
+    +----+------+
+    |  1 | user |
+    +----+------+
+    1 row in set (0.00 sec)
 
 =item Field
 
 An L<AuditLogField|DBIx::Class::AuditLog::Schema::Structure::Field> contains a unique list of fields for each table that is being audited.  The name field contains the name of a field from a specific table inyour database.  AuditLogField rows are added as needed whenever an insert/update/date occurs.
 
+    mysql> select * from audit_log_field order by id;
+    +----+---------------+-------+
+    | id | audited_table | name  |
+    +----+---------------+-------+
+    |  1 |             1 | name  |
+    |  2 |             1 | id    |
+    |  3 |             1 | phone |
+    +----+---------------+-------+
+    3 rows in set (0.00 sec)
+    
 =back
 
 =head1 DEPLOYMENT
+
+To deploy and AuditLog schema, load your main schema, and then run the deploy command on the audit_log_schema:
+
+    my $schema = AuditTest::Schema->connect( "DBI:mysql:database=audit_test",
+        "root", "somepassword", { RaiseError => 1, PrintError => 0 } );
+    
+    $schema->audit_log_schema->deploy;
+    
+Note: this should only be run once.
+
+=head1 ACCESSING THE AUDIT LOG SCHEMA
+
+The Audit Log schema ca be accessed from your main schema by calling the audit_log_schema method:
+
+    my $al_schema = $schema->audit_log_schema;
+    
+=head1 TODO
+
+=over4
+
+=item add convenience method(s) for retrieving changes from the Audit Log schema
+
+=item add auto-deploy of schema if it doesn't exist
+
+=back
 
 =head1 SEE ALSO
 
