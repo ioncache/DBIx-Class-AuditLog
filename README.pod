@@ -222,9 +222,9 @@ The Audit Log schema ca be accessed from your main schema by calling the audit_l
 
 =over 4
 
-=item add convenience method(s) for retrieving changes from the Audit Log schema
+=item * add convenience method(s) for retrieving changes from the Audit Log schema
 
-=item add auto-deploy of schema if it doesn't exist
+=item * add auto-deploy of schema if it doesn't exist
 
 =back
 
