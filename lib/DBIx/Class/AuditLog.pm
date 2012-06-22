@@ -96,6 +96,8 @@ sub delete {
 
 Returns the AuditLog schema from storage.
 
+    my $al_schema = $schmea->audit_log_schema;
+
 =cut
 
 sub _audit_log_schema {
@@ -179,5 +181,7 @@ sub _do_audit {
     my $info = $self->column_info($column);
     return defined $info->{audit_log_column} && $info->{audit_log_column} == 0 ? 0 : 1;
 }
+
+# ABSTRACT: Simple activity audit logging for DBIx::Class
 
 1;
