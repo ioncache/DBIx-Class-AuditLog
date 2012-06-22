@@ -46,6 +46,26 @@ Any insert/update/delete that requires auditing must be wrapped in a L<"txn_do"|
 
 Transactions are saved as Changesets.  Each Changeset can have many Actions.  An Action can be of type insert/update/delete.  Actions can have many Changes. Changes show the data that was changed during an action.
 
+By default all columns will be audited in any table where the AuditLog component is loaded.
+
+On an individual column basis you can disable auditing by setting 'audit_log_column' to 0:
+
+    __PACKAGE__->add_columns(
+      "admin_id",
+      { data_type => "integer", is_auto_increment => 1, is_nullable => 0, audit_log_column => 0 },
+      "admin_name",
+      { data_type => "varchar", is_nullable => 0, size => 20 },
+      "admin_pasword",
+      { data_type => "varchar", is_nullable => 0, size => 20 },
+    );
+
+If you are using a DBIx::Class generated schema, and don't want to modify the column defintions directly, you can ad the following to the editable portion of the Result Class file:
+
+    __PACKAGE__->add_columns(
+        "+admin_id",
+        { audit_log_column => 0, }
+    );
+    
 =head1 TABLE STRUCTURE
 
 The AuditLog schema is a self-contained schema that keeps no relationships to your main schema.
