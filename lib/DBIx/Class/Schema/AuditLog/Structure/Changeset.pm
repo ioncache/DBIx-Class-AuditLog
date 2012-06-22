@@ -5,6 +5,8 @@ use base 'DBIx::Class::Core';
 use strict;
 use warnings;
 
+__PACKAGE__->load_components(qw< TimeStamp >);
+
 __PACKAGE__->table('audit_log_changeset');
 
 __PACKAGE__->add_columns(
@@ -20,7 +22,7 @@ __PACKAGE__->add_columns(
     },
     'timestamp' => {
         'data_type'     => 'timestamp',
-        'default_value' => \'CURRENT_TIMESTAMP()',
+        'set_on_create' => 1,
         'is_nullable'   => 0,
     },
     'user' => {
