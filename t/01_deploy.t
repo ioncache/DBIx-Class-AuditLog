@@ -1,7 +1,6 @@
 use strict;
 use warnings;
 
-use Data::Printer;
 use DBICx::TestDatabase;
 use Test::More;
 
