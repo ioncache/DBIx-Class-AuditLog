@@ -59,7 +59,7 @@ On an individual column basis you can disable auditing by setting 'audit_log_col
       { data_type => "varchar", is_nullable => 0, size => 20 },
     );
 
-If you are using a DBIx::Class generated schema, and don't want to modify the column defintions directly, you can ad the following to the editable portion of the Result Class file:
+If you are using a DBIx::Class generated schema, and don't want to modify the column defintions directly, you can add the following to the editable portion of the Result Class file:
 
     __PACKAGE__->add_columns(
         "+admin_id",
