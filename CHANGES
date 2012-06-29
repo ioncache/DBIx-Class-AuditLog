@@ -1,0 +1,11 @@
+0.2.0 - 2012/06/28
+
+    New:
+    - added get_changes method, used for getting changes related to a row from a specific table
+ 
+    Updated:
+    - 
+
+0.1.0 - 2012/06/22
+ 
+    Initial release

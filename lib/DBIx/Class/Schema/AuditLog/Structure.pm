@@ -21,6 +21,14 @@ sub _current_changeset {
     return $ref && $ref->{changeset};
 }
 
+=head2 current_changeset
+
+Returns the changeset that is currently in process.
+
+This is localized to the scope of each transaction.
+
+=cut
+
 sub current_changeset {
     my ( $self, @args ) = @_;
 
@@ -52,6 +60,14 @@ sub current_changeset {
     return;
 }
 
+=head2 audit_log_create_changeset
+
+Creates a new Changeset for audited Actions.
+
+Will create a new Audit Log User if ncessary.
+
+=cut
+
 sub audit_log_create_changeset {
     my $self           = shift;
     my $changeset_data = shift;
@@ -72,6 +88,15 @@ sub audit_log_create_changeset {
 
     return $changeset;
 }
+
+=head2 audit_log_create_action
+
+Creates a related Action for the current Changeset.
+
+Also will create an AuditedTable for the new action if
+it doesn't already exist.
+
+=cut
 
 sub audit_log_create_action {
     my $self        = shift;
@@ -103,21 +128,27 @@ sub audit_log_create_action {
 
 Returns DBIC resultset of audit changes.
 
+Takes a passed options hashref.
+
 Required:
-    audited row: row id from the table that was audited
-    table name:  name of the table that was audited
-                 this must include the schema name
-                 for databases that have multiple schemas
+    id: row id from the table that was audited
+    table:  name of the table that was audited
+            this must include the schema name
+            for databases that have multiple schemas
 
 Optional:
-    field_name: name of the field that was audited
+    field: name of the field that was audited
+    action_types: array ref of action types: [ delete, insert, update ]
 
 =cut
 sub get_changes {
-    my $self        = shift;
-    my $audited_row = shift;
-    my $table_name  = shift;
-    my $field_name  = shift;
+    my $self    = shift;
+    my $options = shift;
+
+    my $audited_row = $options->{id} ;
+    my $table_name  = $options->{table};
+    my $field_name  = $options->{field};
+    my $action_types = $options->{action_types} || [ 'insert', 'update', 'delete' ];
 
     return if !$audited_row || !$table_name;
 
@@ -132,7 +163,7 @@ sub get_changes {
         'Action',
         {   audited_table => $table->id,
             audited_row   => $audited_row,
-            type          => [ 'insert', 'update' ],
+            type          => $action_types,
         }
         ) if $table;
 
