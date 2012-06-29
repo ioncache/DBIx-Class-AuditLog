@@ -99,4 +99,59 @@ sub audit_log_create_action {
     return;
 }
 
+=head2 get_changes
+
+Returns DBIC resultset of audit changes.
+
+Required:
+    audited row: row id from the table that was audited
+    table name:  name of the table that was audited
+                 this must include the schema name
+                 for databases that have multiple schemas
+
+Optional:
+    field_name: name of the field that was audited
+
+=cut
+sub get_changes {
+    my $self        = shift;
+    my $audited_row = shift;
+    my $table_name  = shift;
+    my $field_name  = shift;
+
+    return if !$audited_row || !$table_name;
+
+    my $schema = $self;
+
+    my $table
+        = $schema->resultset('AuditLogAuditedTable')
+        ->find( { name => $table_name, } );
+
+    my $actions
+        = $schema->resultset('AuditLogChangeset')->search_related(
+        'Action',
+        {   audited_table => $table->id,
+            audited_row   => $audited_row,
+            type          => [ 'insert', 'update' ],
+        }
+        ) if $table;
+
+    if ( $actions && $actions->count ) {
+        my $field = $table->find_related( 'Field', { name => $field_name } )
+            if $field_name;
+
+        my $criteria = {};
+        $criteria->{field} = $field->id if $field;
+
+        my $changes = $actions->search_related(
+            'Change',
+            $criteria,
+            { order_by => 'me.id desc', }
+        );
+        return $changes;
+    }
+
+    return;
+}
+
 1;
