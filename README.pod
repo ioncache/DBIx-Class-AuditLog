@@ -203,13 +203,15 @@ An L<AuditLogField|DBIx::Class::AuditLog::Schema::Structure::Field> contains a u
 
 =head1 DEPLOYMENT
 
-To deploy and AuditLog schema, load your main schema, and then run the deploy command on the audit_log_schema:
+To deploy an AuditLog schema, load your main schema, and then run the deploy command on the audit_log_schema:
 
     my $schema = AuditTest::Schema->connect( "DBI:mysql:database=audit_test",
         "root", "somepassword", { RaiseError => 1, PrintError => 0 } );
     
     $schema->audit_log_schema->deploy;
-    
+
+The db user that is deploying the schema must have the correct create table permissions.
+
 Note: this should only be run once.
 
 =head1 ACCESSING THE AUDIT LOG SCHEMA
