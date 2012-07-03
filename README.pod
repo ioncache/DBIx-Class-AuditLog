@@ -224,7 +224,7 @@ Note: this should only be run once.
 
 =back
 
-The Audit Log schema ca be accessed from your main schema by calling the audit_log_schema method:
+The Audit Log schema can be accessed from your main schema by calling the audit_log_schema method.
 
     my $al_schema = $schema->audit_log_schema;
 
@@ -257,9 +257,9 @@ A convenience method for reading changes from the Audit Log.
 
 =over 4
 
-=item * add convenience method(s) for retrieving changes from the Audit Log schema
-
 =item * add auto-deploy of schema if it doesn't exist
+
+=item * add more convenience method(s) for retrieving changes from the Audit Log schema
 
 =back
 
@@ -275,13 +275,13 @@ A convenience method for reading changes from the Audit Log.
 
 =head1 ACKNOWLEDGEMENTS
 
-Development time supported by OANDA (<www.oanda.com>).
+Development time supported by OANDA L<http://www.oanda.com>.
 
-Many ideas and code borrowed from  L<DBIx::Class::Journal>
+Many ideas and code borrowed from L<DBIx::Class::Journal>.
 
 =head1 AUTHOR
 
-Mark Jubenville <ioncache@gmail.com>
+Mark Jubenville L<mailto:ioncache@gmail.com|ioncache>
 
 =head1 COPYRIGHT AND LICENCE
 
