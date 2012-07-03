@@ -275,13 +275,13 @@ A convenience method for reading changes from the Audit Log.
 
 =head1 ACKNOWLEDGEMENTS
 
-Development time supported by OANDA L<http://www.oanda.com>.
+Development time supported by OANDA L<www.oanda.com|http://www.oanda.com>.
 
 Many ideas and code borrowed from L<DBIx::Class::Journal>.
 
 =head1 AUTHOR
 
-Mark Jubenville L<mailto:ioncache@gmail.com|ioncache>
+Mark Jubenville (L<ioncache|mailto:ioncache@gmail.com>)
 
 =head1 COPYRIGHT AND LICENCE
 
