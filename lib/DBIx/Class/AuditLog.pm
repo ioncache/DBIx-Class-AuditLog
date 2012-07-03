@@ -5,7 +5,7 @@ use base qw/DBIx::Class/;
 use strict;
 use warnings;
 
-our $VERSION = '0.020010';
+our $VERSION = '0.002002';
 
 =head1 DBIx::Class OVERRIDDEN METHODS
 
