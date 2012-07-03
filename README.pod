@@ -214,11 +214,44 @@ The db user that is deploying the schema must have the correct create table perm
 
 Note: this should only be run once.
 
-=head1 ACCESSING THE AUDIT LOG SCHEMA
+=head1 METHODS
+
+=head2 audit_log_schema
+
+=over 4
+
+=item Returns: DBIC schema
+
+=back
 
 The Audit Log schema ca be accessed from your main schema by calling the audit_log_schema method:
 
     my $al_schema = $schema->audit_log_schema;
+
+=head2 get_changes
+
+=over 4
+
+=item Required: id, table
+
+=item Optional: field, action_type
+
+=item Returns: DBIC resultset
+
+=back
+
+A convenience method for reading changes from the Audit Log.
+
+    my $al_schema = $schema->audit_log_schema;
+    my $changes  = $al_schema->get_changes({
+        id => 1,
+        table => 'foo',
+        field => 'bar', # optional,
+        action_type => 'insert', # optional, 1 of insert, update, delete
+        
+    });
+
+
     
 =head1 TODO
 
@@ -239,6 +272,12 @@ The Audit Log schema ca be accessed from your main schema by calling the audit_l
 =item * L<DBIx::Class::Journal>
 
 =back
+
+=head1 ACKNOWLEDGEMENTS
+
+Development time supported by OANDA (<www.oanda.com>).
+
+Many ideas and code borrowed from  L<DBIx::Class::Journal>
 
 =head1 AUTHOR
 
