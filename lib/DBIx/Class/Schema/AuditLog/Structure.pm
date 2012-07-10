@@ -145,27 +145,32 @@ sub get_changes {
     my $self    = shift;
     my $options = shift;
 
-    my $audited_row = $options->{id} ;
-    my $table_name  = $options->{table};
-    my $field_name  = $options->{field};
-    my $action_types = $options->{action_types} || [ 'insert', 'update', 'delete' ];
+    my $audited_row  = $options->{id};
+    my $table_name   = $options->{table};
+    my $field_name   = $options->{field};
+    my $timestamp    = $options->{timestamp};
+    my $action_types = $options->{action_types}
+        || [ 'insert', 'update', 'delete' ];
 
     return if !$audited_row || !$table_name;
 
     my $schema = $self;
 
-    my $table
-        = $schema->resultset('AuditLogAuditedTable')
+    my $table = $schema->resultset('AuditLogAuditedTable')
         ->find( { name => $table_name, } );
 
-    my $actions
-        = $schema->resultset('AuditLogChangeset')->search_related(
+    my %changeset_criteria;
+    $changeset_criteria{timestamp} = $timestamp if $timestamp;
+    my $changesets = $schema->resultset('AuditLogChangeset')
+        ->search( \%changeset_criteria );
+
+    my $actions = $changesets->search_related(
         'Action',
         {   audited_table => $table->id,
             audited_row   => $audited_row,
             type          => $action_types,
         }
-        ) if $table;
+    ) if $table;
 
     if ( $actions && $actions->count ) {
         my $field = $table->find_related( 'Field', { name => $field_name } )
@@ -174,11 +179,8 @@ sub get_changes {
         my $criteria = {};
         $criteria->{field} = $field->id if $field;
 
-        my $changes = $actions->search_related(
-            'Change',
-            $criteria,
-            { order_by => 'me.id desc', }
-        );
+        my $changes = $actions->search_related( 'Change', $criteria,
+            { order_by => 'me.id desc', } );
         return $changes;
     }
 
