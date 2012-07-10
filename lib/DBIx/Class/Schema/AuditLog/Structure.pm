@@ -144,7 +144,7 @@ Optional:
 sub get_changes {
     my $self    = shift;
     my $options = shift;
-$self->storage->debug(1);
+
     my $audited_row  = $options->{id};
     my $table_name   = $options->{table};
     my $field_name   = $options->{field};
@@ -161,7 +161,7 @@ $self->storage->debug(1);
     # cannot get changes if the specified table hasn't been logged
     return unless defined $table;
 
-    my $changeset_criteria = { 1 => 1 };
+    my $changeset_criteria;
     $changeset_criteria->{timestamp} = $timestamp if $timestamp;
     my $changesets = $self->resultset('AuditLogChangeset')
         ->search_rs( $changeset_criteria );
