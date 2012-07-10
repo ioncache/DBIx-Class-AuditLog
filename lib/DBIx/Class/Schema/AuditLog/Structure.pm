@@ -137,8 +137,18 @@ Required:
             for databases that have multiple schemas
 
 Optional:
-    field: name of the field that was audited
     action_types: array ref of action types: [ delete, insert, update ]
+    change_order: sets the order to return the results, either asc, or desc
+                  defaults to desc
+    field: name of the field that was audited
+    timestamp: timestamp of the changeset to search by
+               takes a standard dbic where clause for a field,
+               eg:
+                   '2012-07-09-15.25.18'
+                or
+                   { '>=' , '2012-07-09-15.25.18; }
+               the timestamp must already be in the format that the
+               database stores in
 
 =cut
 sub get_changes {
@@ -146,8 +156,9 @@ sub get_changes {
     my $options = shift;
 
     my $audited_row  = $options->{id};
-    my $table_name   = $options->{table};
+    my $change_order = $options->{change_order} || 'desc';
     my $field_name   = $options->{field};
+    my $table_name   = $options->{table};
     my $timestamp    = $options->{timestamp};
     my $action_types = $options->{action_types}
         || [ 'insert', 'update', 'delete' ];
@@ -161,7 +172,7 @@ sub get_changes {
     # cannot get changes if the specified table hasn't been logged
     return unless defined $table;
 
-    my $changeset_criteria;
+    my $changeset_criteria = {};
     $changeset_criteria->{timestamp} = $timestamp if $timestamp;
     my $changesets = $self->resultset('AuditLogChangeset')
         ->search_rs( $changeset_criteria );
@@ -182,7 +193,7 @@ sub get_changes {
         $criteria->{field} = $field->id if $field;
 
         my $changes = $actions->search_related( 'Change', $criteria,
-            { order_by => 'me.id desc', } );
+            { order_by => 'me.id ' . $change_order, } );
         return $changes;
     }
 
