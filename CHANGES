@@ -1,3 +1,8 @@
+0.2.3 - 2012/08/09
+
+    Updated:
+    - no longer using get_columns to pull data from dbic objects as this pulls from storage and bypasses any filters/inflaters - MATTP
+
 0.2.2 - 2012/07/03
 
     Updated:
