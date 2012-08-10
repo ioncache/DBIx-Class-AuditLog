@@ -1,3 +1,8 @@
+0.2.5 - 2012/08/10
+
+    Updated:
+    - after discussions with MATTP, reverting his change to remove the get_columns calls for now
+
 0.2.4 - 2012/08/09
 
     Updated:
