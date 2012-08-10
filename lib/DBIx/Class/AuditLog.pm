@@ -21,7 +21,7 @@ sub insert {
     my ( $action, $table ) = $self->_action_setup( $result, 'insert' );
 
     if ($action) {
-        my %column_data = map +($_ => $result->$_), $self->result_source->columns;
+        my %column_data = $result->get_columns;
         $self->_store_changes( $action, $table, {}, \%column_data );
     }
 
@@ -36,7 +36,7 @@ sub update {
     my $self = shift;
 
     my $stored_row = $self->get_from_storage;
-    my %old_data   = map +($_ => $stored_row->$_), $self->result_source->columns;
+    my %old_data   = $stored_row->get_columns;
     my %new_data   = $self->get_dirty_columns;
 
     my $result = $self->next::method(@_);
@@ -81,7 +81,7 @@ sub delete {
     my ( $action, $table ) = $self->_action_setup( $stored_row, 'delete' );
 
     if ($action) {
-        my %old_data = map +($_ => $result->$_), $self->result_source->columns;
+        my %old_data = $stored_row->get_columns;
         $self->_store_changes( $action, $table, \%old_data, {} );
     }
 
