@@ -173,11 +173,13 @@ Requires:
 =cut
 
 sub _do_audit {
-    my $self = shift;
+    my $self   = shift;
     my $column = shift;
 
     my $info = $self->column_info($column);
-    return defined $info->{audit_log_column} && $info->{audit_log_column} == 0 ? 0 : 1;
+    return
+        defined $info->{audit_log_column}
+        && $info->{audit_log_column} == 0 ? 0 : 1;
 }
 
 # ABSTRACT: Simple activity audit logging for DBIx::Class
