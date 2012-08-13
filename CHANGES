@@ -1,3 +1,8 @@
+0.2.6 - 2012/08/13
+
+    New:
+    - the AuditLog result classes now inherit from a base class, useful for overriding if need be -- MATTP
+
 0.2.5 - 2012/08/10
 
     Updated:
