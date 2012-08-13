@@ -1,6 +1,6 @@
 package DBIx::Class::Schema::AuditLog::Structure::Change;
 
-use base 'DBIx::Class::Core';
+use base 'DBIx::Class::Schema::AuditLog::Structure::Base';
 
 use strict;
 use warnings;
