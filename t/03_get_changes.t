@@ -58,6 +58,14 @@ $schema->txn_do(
     },
 );
 
+is $al_schema->resultset("AuditLogField")->search({ name => "email"})->count, 0, "no email is logged";
+TODO: {
+	local $TODO = "bug in get_changes has to be fixed";
+        my $change = $al_schema->get_changes(
+            { id => $test_user->id, table => 'user', field => "email" } );
+        is $change->count, 0, "get_changes returns no changes for column email";
+};
+
 foreach my $field (@change_fields) {
     my $change = $al_schema->get_changes(
         { id => $test_user->id, table => 'user', field => $field } )->first;
