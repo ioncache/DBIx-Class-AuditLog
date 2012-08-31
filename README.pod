@@ -176,7 +176,7 @@ This table does not get a relationship to any table in your main schema.
     
 =item Changeset
 
-An L<AuditLogChangeset|DBIx::Class::AuditLog::Schema::Structure::Changeset> is an identifier for a transaction.  It can have many L<Actions|DBIx::Class::AuditLog::Schema::Structure::Action>.  It can optionally be owned by a L<User|DBIx::Class::AuditLog::Schema::Structure::User>.  And optionally have a description.
+An L<AuditLogChangeset|DBIx::Class::Schema::AuditLog::Structure::Changeset> is an identifier for a transaction.  It can have many L<Actions|DBIx::Class::Schema::AuditLog::Structure::Action>.  It can optionally be owned by a L<User|DBIx::Class::Schema::AuditLog::Structure::User>.  And optionally have a description.
 
     mysql> select * from audit_log_changeset order by id;
     +----+----------------------------------------------+---------------------+------+
@@ -193,7 +193,7 @@ An L<AuditLogChangeset|DBIx::Class::AuditLog::Schema::Structure::Changeset> is a
 
 =item Action
 
-An L<AuditLogAction|DBIx::Class::AuditLog::Schema::Structure::Action> is an insert/update/delete belonging to a L<Changeset|DBIx::Class::AuditLog::Schema::Structure::Changeset>.  It is also owned by L<Table|DBIx::Class::AuditLog::Schema::Structure::AuditedTable>.
+An L<AuditLogAction|DBIx::Class::Schema::AuditLog::Structure::Action> is an insert/update/delete belonging to a L<Changeset|DBIx::Class::Schema::AuditLog::Structure::Changeset>.  It is also owned by L<Table|DBIx::Class::Schema::AuditLog::Structure::AuditedTable>.
 
     mysql> select * from audit_log_action order by id;
     +----+-----------+---------------+-------------+--------+
@@ -214,7 +214,7 @@ An L<AuditLogAction|DBIx::Class::AuditLog::Schema::Structure::Action> is an inse
 
 =item Change
 
-An L<AuditLogChange|DBIx::Class::AuditLog::Schema::Structure::Change> contains changed data for one AuditLogField in an AuditLogAction.  The original value is stored in the old_value field and the new value is stored in the new_value field.
+An L<AuditLogChange|DBIx::Class::Schema::AuditLog::Structure::Change> contains changed data for one AuditLogField in an AuditLogAction.  The original value is stored in the old_value field and the new value is stored in the new_value field.
 
     mysql> select * from audit_log_change order by id;
     +----+--------+-------+--------------+--------------+
@@ -245,7 +245,7 @@ An L<AuditLogChange|DBIx::Class::AuditLog::Schema::Structure::Change> contains c
 
 =item AuditedTable
 
-An L<AuditLogAuditedTable|DBIx::Class::AuditLog::Schema::Structure::AuditedTable> contains a unique list of tables that are being tracked.  The name field contains the name of a table from your database.  AuditLogAuditedTable rows are added as needed whenever an insert/update/date occurs.
+An L<AuditLogAuditedTable|DBIx::Class::Schema::AuditLog::Structure::AuditedTable> contains a unique list of tables that are being tracked.  The name field contains the name of a table from your database.  AuditLogAuditedTable rows are added as needed whenever an insert/update/date occurs.
 
 Note: at least for DB2, the table name will have the schema name added as well, eg., myschema.foo for the foo table in schema myschema.
 
@@ -259,7 +259,7 @@ Note: at least for DB2, the table name will have the schema name added as well, 
 
 =item Field
 
-An L<AuditLogField|DBIx::Class::AuditLog::Schema::Structure::Field> contains a unique list of fields for each table that is being audited.  The name field contains the name of a field from a specific table inyour database.  AuditLogField rows are added as needed whenever an insert/update/date occurs.
+An L<AuditLogField|DBIx::Class::Schema::AuditLog::Structure::Field> contains a unique list of fields for each table that is being audited.  The name field contains the name of a field from a specific table inyour database.  AuditLogField rows are added as needed whenever an insert/update/date occurs.
 
     mysql> select * from audit_log_field order by id;
     +----+---------------+-------+
