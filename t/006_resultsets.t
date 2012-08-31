@@ -15,7 +15,6 @@ my $al_schema = $schema->audit_log_schema;
 my $users = $schema->resultset('User');
 my $changesets;
 
-# CREATE
 $schema->txn_do(
     sub {
         $users->create(
@@ -58,10 +57,8 @@ $schema->txn_do(
     },
 );
 
-$changesets = undef;
-
 is($users->count, 0, "0 users after deletion via resultset");
-subtest "check changesets after user delete" => sub {
+subtest "check changesets after user deletion" => sub {
     $changesets = $al_schema->resultset('AuditLogChangeset');
     is($changesets->count, 2, "2 changesets after deletion");
     my $actions = $al_schema->resultset('AuditLogAction');
