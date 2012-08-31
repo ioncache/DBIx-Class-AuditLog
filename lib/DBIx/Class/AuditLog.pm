@@ -1,13 +1,9 @@
 package DBIx::Class::AuditLog;
-{
-  $DBIx::Class::AuditLog::VERSION = '0.2.6';
-}
 
 use base qw/DBIx::Class/;
 
 use strict;
 use warnings;
-
 
 sub insert {
     my $self = shift;
@@ -35,8 +31,9 @@ sub update {
 
     my $result = $self->next::method(@_);
 
-    if ( @changed_columns ) {
-        @new_data{ @changed_columns } = map $self->get_column($_), @changed_columns;
+    if (@changed_columns) {
+        @new_data{@changed_columns} = map $self->get_column($_),
+            @changed_columns;
     }
 
     foreach my $col ($self->columns){
@@ -93,7 +90,6 @@ sub _audit_log_schema {
     return $self->result_source->schema->audit_log_schema;
 }
 
-
 sub _action_setup {
     my $self = shift;
     my $row  = shift;
@@ -143,7 +139,6 @@ sub _store_changes {
         }
     }
 }
-
 
 sub _force_audit{
     my ($self, $column) = @_;

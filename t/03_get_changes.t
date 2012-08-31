@@ -58,14 +58,6 @@ $schema->txn_do(
     },
 );
 
-is $al_schema->resultset("AuditLogField")->search({ name => "email"})->count, 0, "no email is logged";
-TODO: {
-	local $TODO = "bug in get_changes has to be fixed";
-        my $change = $al_schema->get_changes(
-            { id => $test_user->id, table => 'user', field => "email" } );
-        is $change->count, 0, "get_changes returns no changes for column email";
-};
-
 foreach my $field (@change_fields) {
     my $change = $al_schema->get_changes(
         { id => $test_user->id, table => 'user', field => $field } )->first;
@@ -100,5 +92,12 @@ foreach my $field (@change_fields) {
             . ( $change->new_value ? $change->new_value : '' ) . "'"
     );
 }
+
+is $al_schema->resultset("AuditLogField")->search( { name => "email" } )
+    ->count, 0, "Email field hasn't been added to AuditLogField table.";
+
+my $change = $al_schema->get_changes(
+    { id => $test_user->id, table => 'user', field => "email" } );
+is $change->count, 0, "Getting changes on field 'email' returns 0 when calling get_changes.";
 
 done_testing();
