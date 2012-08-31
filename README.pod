@@ -48,6 +48,12 @@ Transactions are saved as Changesets.  Each Changeset can have many Actions.  An
 
 By default all updated columns will be audited in any table where the AuditLog component is loaded.
 
+=head1 ADDITIONAL DBIC COLUMN ATTRIBUTES
+
+Individual columns can have additional attributes added to change the Audit Log functionality.
+
+=head2 audit_log_column
+
 On an individual column basis you can disable auditing by setting 'audit_log_column' to 0:
 
     __PACKAGE__->add_columns(
@@ -65,8 +71,8 @@ If you are using a DBIx::Class generated schema, and don't want to modify the co
         "+admin_id",
         { audit_log_column => 0, }
     );
-
-=head2 AUDITING UNCHANGED COLUMNS
+    
+=head2 force_audit_log_column
 
 By default, columns are only audited if their value changed.
 It is possible to force auditing on a per-column basis by setting 
@@ -79,15 +85,16 @@ It is possible to force auditing on a per-column basis by setting
 
 If auditing is forced for a column, the 'audit_log_column' attribute is ignored.
     
-=head2 MODIFYING AUDITED VALUES
+=head2 modify_audit_value
 
-It is possible to modify the values stored by DBIC::AuditLog on a per-column basis by setting the 'modify_audit_value' attibute to either a CodeRef, a method
-name or any true value. The configured code will be run as a object method of
-the current DBIC::Result object, and expects the original value as parameter. 
-If 'modify_audit_value' is set to a true value
-which is NOT a method in the current objects class, AuditLog will look for a 
-method called 'modify_audit_$colname', where $colname is the name of the
-corresponding column.
+It is possible to modify the values stored by DBIC::AuditLog on a per-column basis
+by setting the 'modify_audit_value' attibute to either a CodeRef, a method
+name or any true value. The configured code will be run as an object method of
+the current DBIC::Result object, and expects the original value as parameter.
+
+If 'modify_audit_value' is set to a true value which is NOT a method in the
+current objects class, AuditLog will look for a method called
+'modify_audit_$colname', where $colname is the name of the corresponding column.
 
 Note: AuditLog will simply die if it can not find the modification method while
 'modify_audit_value' is true.
