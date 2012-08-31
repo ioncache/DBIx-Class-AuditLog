@@ -101,8 +101,6 @@ Note: AuditLog will simply die if it can not find the modification method while
 
 The following examples have the same result:
 
-=over
-
 passing a coderef:
 
     __PACKAGE__->add_columns(
@@ -139,8 +137,6 @@ passing a true value which is NOT a method name:
         $value =~ tr/A-Z/a-z/;
         return $value;
     }
-
-=back 
 
 =head1 TABLE STRUCTURE
 
