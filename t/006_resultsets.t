@@ -41,11 +41,11 @@ $schema->txn_do(
     },
 );
 
-is($users->count, 3, "3 users created");
+is( $users->count, 3, "3 users created" );
 subtest "check changesets after initial user creation" => sub {
     $changesets = $al_schema->resultset('AuditLogChangeset');
-    is($changesets->count, 1, "1 changeset created");
-    is($changesets->first->Action->count, 3, "3 actions created");
+    is( $changesets->count,                1, "1 changeset created" );
+    is( $changesets->first->Action->count, 3, "3 actions created" );
 };
 
 $schema->txn_do(
@@ -57,12 +57,12 @@ $schema->txn_do(
     },
 );
 
-is($users->count, 0, "0 users after deletion via resultset");
+is( $users->count, 0, "0 users after deletion via resultset" );
 subtest "check changesets after user deletion" => sub {
     $changesets = $al_schema->resultset('AuditLogChangeset');
-    is($changesets->count, 2, "2 changesets after deletion");
+    is( $changesets->count, 2, "2 changesets after deletion" );
     my $actions = $al_schema->resultset('AuditLogAction');
-    is($actions->count, 6, "6 actions after deletion");
+    is( $actions->count, 6, "6 actions after deletion" );
 };
 
 done_testing();

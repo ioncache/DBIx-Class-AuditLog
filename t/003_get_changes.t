@@ -98,6 +98,7 @@ is $al_schema->resultset("AuditLogField")->search( { name => "email" } )
 
 my $change = $al_schema->get_changes(
     { id => $test_user->id, table => 'user', field => "email" } );
-is $change->count, 0, "Getting changes on field 'email' returns 0 when calling get_changes.";
+is $change->count, 0,
+    "Getting changes on field 'email' returns 0 when calling get_changes.";
 
 done_testing();
