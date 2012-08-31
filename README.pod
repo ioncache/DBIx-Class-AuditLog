@@ -159,7 +159,7 @@ The AuditLog schema consists of 6 tables:
 
 =item User
 
-The An L<AuditLogUser|DBIx::Class::Schema::AuditLog::Structure::User> table contains a unique list of users that have executed transactions.  The 'name' field is used to store the User identifier.  This could be used for a user's name or id or other unique identifier as needed.
+The L<AuditLogUser|DBIx::Class::Schema::AuditLog::Structure::User> table contains a unique list of users that have executed transactions.  The 'name' field is used to store the User identifier.  This could be used for a user's name or id or other unique identifier as needed.
 
 This table does not get a relationship to any table in your main schema.
 
