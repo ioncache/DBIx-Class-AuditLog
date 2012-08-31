@@ -1,3 +1,12 @@
+0.3.0 - 2012/08/31
+
+    New:
+    - new dbic column attribute 'force_audit_log_column': force the value to be logged even if it didn't change (ie, new_value = old_value) -- LUKAST
+    - new dbic column attribute 'modify_audit_value': modify value of column before being stored in audit log -- LUKAST
+
+    Fixed:
+    - when passing a field to get_changes that didn't exist in the audit_log_field table all changes were being returned instead of none
+
 0.2.6 - 2012/08/13
 
     New:
