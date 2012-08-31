@@ -99,13 +99,11 @@ current objects class, AuditLog will look for a method called
 Note: AuditLog will simply die if it can not find the modification method while
 'modify_audit_value' is true.
 
-=head3 EXAMPLES:
-
 The following examples have the same result:
 
 =over
 
-=item * passing a coderef:
+passing a coderef:
 
     __PACKAGE__->add_columns(
         "+name",
@@ -116,7 +114,7 @@ The following examples have the same result:
 	}, }
     );
     
-=item * passing a method name:
+passing a method name:
 
     __PACKAGE__->add_columns(
         "+name",
@@ -129,7 +127,7 @@ The following examples have the same result:
         return $value;
     }
 
-=item * passing a true value which is NOT a method name:
+passing a true value which is NOT a method name:
 
     __PACKAGE__->add_columns(
         "+name",
