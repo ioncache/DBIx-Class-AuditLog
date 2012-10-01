@@ -50,7 +50,7 @@ subtest "check changesets after initial user creation" => sub {
 
 $schema->txn_do(
     sub {
-        $users->delete_all;
+        $users->delete;
     },
     {   description => "deleting all users in resultset",
         user        => "TestAdminUser01",
