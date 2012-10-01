@@ -1,3 +1,8 @@
+0.3.1 - 2012/09/10
+
+    Fixed:
+    - issue where 'field = -1' was being added to get_changes queries when no field was passed in the get_changes request -- DPETROV
+
 0.3.0 - 2012/08/31
 
     New:
