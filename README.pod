@@ -354,6 +354,10 @@ Many ideas and code borrowed from L<DBIx::Class::Journal>.
 
 Mark Jubenville (L<ioncache|mailto:ioncache@gmail.com>)
 
+=head1 CONTRIBUTORS
+
+Lukas Thiemeier (L<lukast|mailto:lukast@cpan.org>)
+
 =head1 COPYRIGHT AND LICENCE
 
 This software is copyright (c) 2012 by Mark Jubenville.
