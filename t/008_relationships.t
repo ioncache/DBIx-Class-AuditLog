@@ -91,9 +91,11 @@ subtest 'validate changeset after create_related' => sub{
 	isa_ok($title_id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
 	ok(! $title_id_change->old_value, 'title_id field has no old value');
 	is($title_id_change->new_value, $title1->id, 'new value for title_id is set correctly');
-
 };
 
-
+my $new_book = $schema->resultset('Book')->find({isbn => '12321'});
+$schema->txn_do(sub{
+	$new_book->add_to_authors($schema->resultset('Person')->find(1));
+});
 
 done_testing;

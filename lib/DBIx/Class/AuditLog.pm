@@ -94,9 +94,8 @@ sub _action_setup {
     my $self = shift;
     my $row  = shift;
     my $type = shift;
-
     return $self->_audit_log_schema->audit_log_create_action(
-        {   row   => $row->id,
+        {   row   => join('-', $row->id),
             table => $row->result_source_instance->name,
             type  => $type,
         }
