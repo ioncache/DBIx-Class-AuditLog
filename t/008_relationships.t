@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use DBICx::TestDatabase;
-use Test::More;
+use Test::More tests => 5;
 
 use lib 't/lib';
 
@@ -179,4 +179,3 @@ subtest 'validate changeset after set_$rel' => sub{
 	is( $book_id_change->new_value, $new_book->id, 'book_id field has correct new value in "insert"');
 };
 
-done_testing;
