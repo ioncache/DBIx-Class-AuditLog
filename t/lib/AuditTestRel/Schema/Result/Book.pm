@@ -18,7 +18,6 @@ __PACKAGE__->add_columns(
 	{
 		data_type => "integer",
 		extra => { unsigned => 1 },
-		is_auto_increment => 1,
 		is_nullable => 0,
 	},
 	"isbn",
