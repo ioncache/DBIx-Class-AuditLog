@@ -36,6 +36,33 @@ Or set the default resultset-class in your Schema:
 		default_resultset_class => "AuditLog"
 	);
 
+=head1 DESCRIPTION
+
+This resultset class enables logging for database updates made by calling
+L<DBIx::Class::ResultSet/delete> and L<DBIx::Class::ResultSet/update>.
+This includes any updates made by methods which rely on the above, like
+L<DBIx::Class::Relationship::Base/set_\$rel>.
+
+If you want full logging in a relational database, you most likely want to use this 
+component.
+
+=head2 NOTE:
+
+The current implementation enables logging in the resultset by simply delegating
+'delete' and 'update' to 'delete_all' and 'update_all', which call the required triggers.
+As a result, a database query like 
+
+ "DELETE FROM table WHERE id IN '1', '2', '3'"
+
+will result in 3 atomic queries:
+
+ "DELETE FROM table WHERE id = '1'";
+ "DELETE FROM table WHERE id = '2'";
+ "DELETE FROM table WHERE id = '3'";
+
+which is much slower. It is therefore recommended to use this module only for resultset classes where it is needed.
+Specifying this module as default resultset class is only recommended if logging is needed for all tables.
+
 
 =head1 L<DBIx::Class::ResultSet> OVERRIDDEN METHODS
 

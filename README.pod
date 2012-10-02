@@ -18,6 +18,26 @@ Enable the AuditLog component in your the individual L<DBIx::Class> table class 
  
     __PACKAGE__->load_components(qw/AuditLog/);
 
+If you want to use methods created by L<DBIx::Class::Relationship::Base>, like "add_to_$rel" or "set_$rel",
+if you are planing to use L<DBIx::Class::ResultSet/delete> or L<DBIx::Class::ResultSet/update> or if you use
+modules which make use of these methods (like L<HTML::FormHandler> or L<DBIx::Class::ResultSet::RecursiveUpdate>, 
+load the AuditLog-component in your ResultSet classes:
+ 
+ package My::Schema::ResultSet::Table;
+
+
+ use base 'DBIx::Class::ResultSet';
+
+ ...
+
+ __PACKAGE__->load_components('ResultSet::AuditLog');
+
+ 1;
+
+If you need auditing in all your tables, an alternative way is to set "DBIC::ResultSet::AuditLog" as your
+default resultset class in load_components. See L<DBIx::Class::ResultSet::AuditLog> for details.
+
+
 In your application wrap any insert/update/delete in a transaction to have audit logging activated:
 
     $my_schema->txn_do(
@@ -195,6 +215,8 @@ An L<AuditLogChangeset|DBIx::Class::Schema::AuditLog::Structure::Changeset> is a
 
 An L<AuditLogAction|DBIx::Class::Schema::AuditLog::Structure::Action> is an insert/update/delete belonging to a L<Changeset|DBIx::Class::Schema::AuditLog::Structure::Changeset>.  It is also owned by L<Table|DBIx::Class::Schema::AuditLog::Structure::AuditedTable>.
 
+If the corresponding table has more than one primary key, the pk-values stored in 'audited_row' are joined with a '-'. 
+(See action with id 11 below.)
     mysql> select * from audit_log_action order by id;
     +----+-----------+---------------+-------------+--------+
     | id | changeset | audited_table | audited_row | type   |
@@ -209,6 +231,7 @@ An L<AuditLogAction|DBIx::Class::Schema::AuditLog::Structure::Action> is an inse
     |  8 |         5 |             1 |           9 | update |
     |  9 |         6 |             1 |          13 | insert |
     | 10 |         6 |             1 |          13 | update |
+    | 11 |         7 |             2 |        3-10 | insert |
     +----+-----------+---------------+-------------+--------+
     10 rows in set (0.00 sec)
 
