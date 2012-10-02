@@ -217,6 +217,7 @@ An L<AuditLogAction|DBIx::Class::Schema::AuditLog::Structure::Action> is an inse
 
 If the corresponding table has more than one primary key, the pk-values stored in 'audited_row' are joined with a '-'. 
 (See action with id 11 below.)
+
     mysql> select * from audit_log_action order by id;
     +----+-----------+---------------+-------------+--------+
     | id | changeset | audited_table | audited_row | type   |
