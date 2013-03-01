@@ -6,7 +6,7 @@ use Test::More;
 
 use lib 't/lib';
 
-my $schema = DBICx::TestDatabase->new('AuditTest::Schema');
+my $schema = DBICx::TestDatabase->new('AuditTest2::Schema');
 
 $schema->audit_log_schema->deploy;
 
@@ -50,7 +50,7 @@ subtest "check changesets after initial user creation" => sub {
 
 $schema->txn_do(
     sub {
-        $users->delete_all;
+        $users->delete;
     },
     {   description => "deleting all users in resultset",
         user        => "TestAdminUser01",
