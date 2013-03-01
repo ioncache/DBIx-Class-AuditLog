@@ -100,7 +100,6 @@ sub audited_sources{
 	grep { $self->class($_)->isa("DBIx::Class::AuditLog") }
 		$self->sources;
 }
-
 	
 =head2 audited_source
 
@@ -110,17 +109,17 @@ sub audited_sources{
 
 =back
 
-like L<DBIx::Class::Schema/source>, but returns 0 if the resulting source does not have
+Like L<DBIx::Class::Schema/source>, but returns 0 if the resulting source does not have
 AuditLog loaded
 
 =cut
 
-sub audited_source{
+sub audited_source {
 	my $source = shift->source(@_);
+
 	return $source if $source && $source->isa("DBIx::Class::AuditLog");
 	return 0;
 }
-
 
 =head2 find_or_create_audit_log_schema_template
 

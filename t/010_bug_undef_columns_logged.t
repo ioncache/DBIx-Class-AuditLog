@@ -15,8 +15,8 @@ my $al_schema = $schema->audit_log_schema;
 is $al_schema->resultset('AuditLogChangeset')->count, 0, 'log is empty';
 
 $schema->populate('User',[
-[qw/id name/],
-[qw/ 0 test/],
+    [qw/id name/],
+    [qw/ 0 test/],
 ]);
 
 my $updates = {
@@ -43,6 +43,5 @@ ok $action->Change_rs->find({field => $namefield->id}), 'changed name column log
 my $mailfield = $al_schema->resultset('AuditLogField')->find({name => 'email'});
 ok $mailfield , 'AuditLogField "email" created';
 ok $action->Change_rs->find({field => $mailfield->id}), 'changed mail column logged';
-
 
 done_testing();
