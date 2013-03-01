@@ -131,6 +131,7 @@ subtest 'DELETE Tests' => sub {
 
 # Disable audit logging when local variable set
 {
+    no warnings 'once';
     local $DBIx::Class::AuditLog::enabled = 0;
 
     $schema->txn_do(
