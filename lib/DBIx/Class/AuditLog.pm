@@ -52,13 +52,15 @@ sub update {
 	    }
     }
 
+    # remove unwanted columns
     foreach my $key ( keys %new_data ) {
-        if (   defined $old_data{$key}
-            && defined $new_data{$key}
-	    && (! $self->_force_audit($key))
-            && $old_data{$key} eq $new_data{$key} )
+	next if $self->_force_audit($key); # skip forced cols
+        if ( defined $old_data{$key} && defined $new_data{$key}
+            && $old_data{$key} eq $new_data{$key} 
+	    || ! defined $old_data{$key} && ! defined $new_data{$key}
+	   )
         {
-            delete $new_data{$key};
+            delete $new_data{$key}; # remove unchanged cols
         }
     }
 
@@ -103,9 +105,8 @@ sub _action_setup {
     my $self = shift;
     my $row  = shift;
     my $type = shift;
-
     return $self->_audit_log_schema->audit_log_create_action(
-        {   row   => $row->id,
+        {   row   => join('-', $row->id),
             table => $row->result_source_instance->name,
             type  => $type,
         }

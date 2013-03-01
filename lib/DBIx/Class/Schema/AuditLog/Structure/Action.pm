@@ -22,7 +22,7 @@ __PACKAGE__->add_columns(
         'is_nullable' => 0,
     },
     'audited_row' => {
-        'data_type'   => 'integer',
+        'data_type'   => 'tinytext',
         'is_nullable' => 0,
     },
     'type' => {
