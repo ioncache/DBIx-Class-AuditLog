@@ -129,4 +129,47 @@ subtest 'DELETE Tests' => sub {
     done_testing();
 };
 
+# Disable audit logging when local variable set
+{
+    local $DBIx::Class::AuditLog::enabled = 0;
+
+    $schema->txn_do(
+        sub {
+            $test_user = $schema->resultset('User')->create(
+                {   name  => "Larry Wall",
+                    email => 'the_king@perl.org',
+                    phone => '123-457-7890',
+                }
+            );
+        },
+        {   description => "adding new user: Lary Wall",
+            user        => "TestAdminUser04",
+        },
+    );
+
+    $al_user = $al_schema->resultset('AuditLogUser')
+        ->search( { name => 'TestAdminUser04' } )->first;   
+
+    ok(!$al_user, 'No audit log created when $DBIx::Class::AuditLog::enabled = 0');
+}
+
+# Audit logging again enabled outside of scope
+$schema->txn_do(
+    sub {
+        $test_user->name('Damian Conway');
+        $test_user->update;
+    },
+    {   description => "updating user: Lary Wall -> name = Damian Conway",
+        user        => "TestAdminUser05",
+    },
+);
+    
+$al_user = $al_schema->resultset('AuditLogUser')
+    ->search( { name => 'TestAdminUser05' } )->first;   
+
+ok( $al_user->Changeset->first->Action->first->Change->first->new_value eq
+        'Damian Conway',
+    "Audit Logging again enabled outside of scoped local"
+);
+
 done_testing();

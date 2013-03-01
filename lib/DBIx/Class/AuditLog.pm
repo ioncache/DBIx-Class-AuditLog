@@ -5,10 +5,14 @@ use base qw/DBIx::Class/;
 use strict;
 use warnings;
 
+# local $DBIx::Class::AuditLog::enabled = 0;
+# can be set to temporarily disable audit logging
+our $enabled = 1;
+
 sub insert {
     my $self = shift;
 
-    return $self->next::method(@_) if $self->in_storage;
+    return $self->next::method(@_) if !$enabled || $self->in_storage;
 
     my $result = $self->next::method(@_);
 
@@ -24,6 +28,9 @@ sub insert {
 
 sub update {
     my $self = shift;
+
+	return $self->next::method(@_) if !$enabled;
+
     my $stored_row = $self->get_from_storage;
     my %old_data   = $stored_row->get_columns;
     my %new_data   = $self->get_columns;
@@ -69,6 +76,8 @@ sub update {
 
 sub delete {
     my $self = shift;
+
+	return $self->next::method(@_) if !$enabled;
 
     my $stored_row = $self->get_from_storage;
 
