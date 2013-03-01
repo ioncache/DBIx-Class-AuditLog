@@ -376,7 +376,7 @@ Many ideas and code borrowed from L<DBIx::Class::Journal>.
 
 =head1 AUTHOR
 
-Mark Jubenville (L<ioncache|mailto:ioncache@gmail.com>)
+Mark Jubenville (L<ioncache|mailto:ioncache@cpan.org>)
 
 =head1 CONTRIBUTORS
 
