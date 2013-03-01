@@ -380,7 +380,7 @@ Mark Jubenville (L<ioncache|mailto:ioncache@cpan.org>)
 
 =head1 CONTRIBUTORS
 
-Lukas Thiemeier 
+Lukas Thiemeier (L<lukast|mailto:lukast@cpan.org>)
 
 =head1 CONTRIBUTORS
 
