@@ -1,4 +1,5 @@
 use utf8;
+
 package AuditTestRel::Schema;
 
 use strict;
@@ -9,7 +10,6 @@ use base 'DBIx::Class::Schema';
 __PACKAGE__->load_components(qw/Schema::AuditLog/);
 
 __PACKAGE__->load_namespaces(
-	default_resultset_class => "+DBIx::Class::ResultSet::AuditLog"
-);
+    default_resultset_class => "+DBIx::Class::ResultSet::AuditLog" );
 
 1;

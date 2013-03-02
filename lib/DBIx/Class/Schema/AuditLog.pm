@@ -100,7 +100,7 @@ sub audited_sources{
     grep { $self->class($_)->isa("DBIx::Class::AuditLog") }
         $self->sources;
 }
-    
+
 =head2 audited_source
 
 =over 

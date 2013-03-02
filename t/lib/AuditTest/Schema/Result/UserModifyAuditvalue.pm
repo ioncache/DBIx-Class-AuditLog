@@ -1,4 +1,5 @@
 use utf8;
+
 package AuditTest::Schema::Result::UserModifyAuditvalue;
 
 # Created by DBIx::Class::Schema::Loader
@@ -50,14 +51,14 @@ __PACKAGE__->table("user");
 =cut
 
 __PACKAGE__->add_columns(
-  "id",
-  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
-  "name",
-  { data_type => "varchar", is_nullable => 1, size => 100 },
-  "phone",
-  { data_type => "varchar", is_nullable => 1, size => 30 },
-  "email",
-  { data_type => "varchar", is_nullable => 1, size => 100 },
+    "id",
+    { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
+    "name",
+    { data_type => "varchar", is_nullable => 1, size => 100 },
+    "phone",
+    { data_type => "varchar", is_nullable => 1, size => 30 },
+    "email",
+    { data_type => "varchar", is_nullable => 1, size => 100 },
 );
 
 =head1 PRIMARY KEY
@@ -72,15 +73,12 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("id");
 
-
 # Created by DBIx::Class::Schema::Loader v0.07015 @ 2012-02-13 15:52:04
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:I6IyqTkjKebY+VQoOcIYqA
 
-
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
 
-__PACKAGE__->load_components( qw/ AuditLog / );
-
+__PACKAGE__->load_components(qw/ AuditLog /);
 
 __PACKAGE__->add_columns(
     "+name",
@@ -88,23 +86,24 @@ __PACKAGE__->add_columns(
     "+email",
     { modify_audit_value => 1, audit_log_column => 1 },
     "+phone",
-    { modify_audit_value => sub{
-	    my ($self, $value) = @_;
-	    $value =~ s/-//g;
-	    return $value;
-    }, },
+    {   modify_audit_value => sub {
+            my ( $self, $value ) = @_;
+            $value =~ s/-//g;
+            return $value;
+        },
+    },
 );
 
-sub mk_lowercase{
-	my ($self, $value) = @_;
-	$value =~ tr/A-Z/a-z/;
-	return $value;
+sub mk_lowercase {
+    my ( $self, $value ) = @_;
+    $value =~ tr/A-Z/a-z/;
+    return $value;
 }
 
-sub modify_audit_email{
-	my ($self, $value) = @_;
-	$value =~ s/@/_at_/;
-	return $value;
+sub modify_audit_email {
+    my ( $self, $value ) = @_;
+    $value =~ s/@/_at_/;
+    return $value;
 }
 
 1;
