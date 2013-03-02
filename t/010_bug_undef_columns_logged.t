@@ -20,7 +20,7 @@ $schema->populate('User',[
 ]);
 
 my $updates = {
-	name => 'test2',
+    name => 'test2',
 };
 
 my $user = $schema->resultset('UserForceaudit')->first;

@@ -22,8 +22,9 @@ __PACKAGE__->add_columns(
         'is_nullable' => 0,
     },
     'audited_row' => {
-        'data_type'   => 'tinytext',
+        'data_type'   => 'varchar',
         'is_nullable' => 0,
+        'size'        => 255,
     },
     'type' => {
         'data_type'   => 'varchar',

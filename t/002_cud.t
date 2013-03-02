@@ -138,7 +138,7 @@ subtest 'DELETE Tests' => sub {
         sub {
             $test_user = $schema->resultset('User')->create(
                 {   name  => "Larry Wall",
-                    email => 'the_king@perl.org',
+                    email => 'lwall@perl.org',
                     phone => '123-457-7890',
                 }
             );
@@ -159,6 +159,13 @@ $schema->txn_do(
     sub {
         $test_user->name('Damian Conway');
         $test_user->update;
+        {
+            no warnings 'once';
+            local $DBIx::Class::AuditLog::enabled = 0;
+
+            $test_user->email('dconway@perl.org');
+            $test_user->update;
+        }
     },
     {   description => "updating user: Lary Wall -> name = Damian Conway",
         user        => "TestAdminUser05",
@@ -170,7 +177,11 @@ $al_user = $al_schema->resultset('AuditLogUser')
 
 ok( $al_user->Changeset->first->Action->first->Change->first->new_value eq
         'Damian Conway',
-    "Audit Logging again enabled outside of scoped local"
+    "Audit Logging again enabled outside of scoped local enabled = 0"
 );
+
+ok( $al_user->Changeset->first->Action->count == 1,
+    'Locally scoped enabled = 0 inside transaction is not logged' );
+
 
 done_testing();

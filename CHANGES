@@ -1,3 +1,15 @@
+0.4.1 - 2013/03/02
+
+    New:
+    - ability to load the AuditLog in a resultset class to enable logging when using methods acting upon an entire resultset (eg, DBIx::Class::RecursiveUpdate) -- LUKAST
+    - Shared variable $DBIx::Class::AuditLog::enabled can be set to 0 to disable audit logging. This can be scoped locally so as to disable logging of a single transaction or inside a transaction to disable logging on a particular transaction action. Note: if DBIx::Class::AuditLog isn't used explicitly in the package where this variable is set, a 'used only once' warning may occur, no warnings 'once' can be set to avoid this if desierd.
+
+    Updated:
+    - audited_row in Action.pm is now a varchar(255) instead of an int to allow for multi-column or non-numeric primary keys -- LUKAST
+
+    Fixed:
+    - issue where updates were logging all fields even when they weren't changed -- LUKAST
+
 0.3.1 - 2012/09/10
 
     Fixed:
@@ -43,7 +55,7 @@
 
     New:
     - added get_changes method, used for getting changes related to a row from a specific table
- 
+
 0.1.0 - 2012/06/22
- 
+
     Initial release

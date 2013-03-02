@@ -22,13 +22,12 @@ If you want to use methods created by L<DBIx::Class::Relationship::Base>, like "
 if you are planing to use L<DBIx::Class::ResultSet/delete> or L<DBIx::Class::ResultSet/update> or if you use
 modules which make use of these methods (like L<HTML::FormHandler> or L<DBIx::Class::ResultSet::RecursiveUpdate>, 
 load the AuditLog-component in your ResultSet classes:
- 
+
  package My::Schema::ResultSet::Table;
 
 
  use base 'DBIx::Class::ResultSet';
 
- ...
 
  __PACKAGE__->load_components('ResultSet::AuditLog');
 
@@ -126,10 +125,10 @@ passing a coderef:
     __PACKAGE__->add_columns(
         "+name",
         { modify_audit_value => sub{
-	    my ($self, $value) = @_;
-	    $value =~ tr/A-Z/a-z/;
-	    return $value;
-	}, }
+        my ($self, $value) = @_;
+        $value =~ tr/A-Z/a-z/;
+        return $value;
+    }, }
     );
     
 passing a method name:
@@ -138,7 +137,7 @@ passing a method name:
         "+name",
         { modify_audit_value => 'to_lowercase'}, 
     );
-	
+    
     sub to_lowercase{
         my ($self, $value) = @_;
         $value =~ tr/A-Z/a-z/;
@@ -151,7 +150,7 @@ passing a true value which is NOT a method name:
         "+name",
         { modify_audit_value => 1}, 
     );
-	
+    
     sub modify_audit_name{
         my ($self, $value) = @_;
         $value =~ tr/A-Z/a-z/;
@@ -347,14 +346,14 @@ A convenience method for reading changes from the Audit Log.
         timestamp    => { '>=', $time }, # optional, $time must be a DateTime object,
         change_order => 'asc',           # optional, 1 of asc, desc
     });
-    
+
 =head1 TODO
 
 =over 4
 
 =item * add auto-deploy of schema if it doesn't exist
 
-=item * add more convenience method(s) for retrieving changes from the Audit Log schema
+=item * add more convenience method(s) for retrieving changes from the Audit Log schema (eg. get a changeset instead of just a list of changes)
 
 =back
 
