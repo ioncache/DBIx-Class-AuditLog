@@ -99,7 +99,6 @@ foreach my $field (@change_fields) {
 # field names that don't exist should not return results
 $changes = $al_schema->get_changes(
     { id => $test_user_id, table => 'user', field => 'bad_field' } );
-diag $changes->count;
 is( $changes->count, 0,
     "Correctly found no changes when searching for field 'bad_field'" );
 
