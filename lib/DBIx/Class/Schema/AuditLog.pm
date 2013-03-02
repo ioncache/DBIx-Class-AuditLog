@@ -96,11 +96,11 @@ returns the list of sourcenames which have DBIx::Class::AuditLog loaded
 =cut
 
 sub audited_sources{
-	my $self = shift;
-	grep { $self->class($_)->isa("DBIx::Class::AuditLog") }
-		$self->sources;
+    my $self = shift;
+    grep { $self->class($_)->isa("DBIx::Class::AuditLog") }
+        $self->sources;
 }
-	
+    
 =head2 audited_source
 
 =over 
@@ -115,10 +115,10 @@ AuditLog loaded
 =cut
 
 sub audited_source {
-	my $source = shift->source(@_);
+    my $source = shift->source(@_);
 
-	return $source if $source && $source->isa("DBIx::Class::AuditLog");
-	return 0;
+    return $source if $source && $source->isa("DBIx::Class::AuditLog");
+    return 0;
 }
 
 =head2 find_or_create_audit_log_schema_template
