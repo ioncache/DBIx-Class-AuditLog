@@ -177,7 +177,7 @@ $al_user = $al_schema->resultset('AuditLogUser')
 
 ok( $al_user->Changeset->first->Action->first->Change->first->new_value eq
         'Damian Conway',
-    "Audit Logging again enabled outside of scoped local"
+    "Audit Logging again enabled outside of scoped local enabled = 0"
 );
 
 ok( $al_user->Changeset->first->Action->count == 1,

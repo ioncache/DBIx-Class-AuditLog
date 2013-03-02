@@ -32,4 +32,3 @@ __PACKAGE__->has_many(
 __PACKAGE__->add_unique_constraint( "name", ["name"] );
 
 1;
-
