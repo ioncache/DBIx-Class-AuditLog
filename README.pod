@@ -4,6 +4,8 @@ DBIx::Class::AuditLog - Simple activity audit logging for DBIx::Class
 
 =head1 SYNOPSIS
 
+NOTE: As of v0.4.2 'quote_names' from L<DBIx::Class::Storage::DBI> is being enabled by the Audit Log.  This is to ensure that any of the table or column names used by the Audit Log don't conflict with any reserved words from any database.
+
 Enable the AuditLog schema component in your L<DBIx::Class::Schema> class file:
 
     package My::Schema;
@@ -15,7 +17,7 @@ Enable the AuditLog component in your the individual L<DBIx::Class> table class 
 
     package My::Schema::Result::Table
     use base qw/DBIx::Class::Core/;
- 
+
     __PACKAGE__->load_components(qw/AuditLog/);
 
 If you want to use methods created by L<DBIx::Class::Relationship::Base>, like "add_to_$rel" or "set_$rel",
