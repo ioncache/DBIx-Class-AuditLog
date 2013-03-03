@@ -26,6 +26,19 @@ Audit Log Schema are protected.
 sub connect {
     my $self = shift;
 
+    # ensure that %dbi_params is part of the connection info
+    if ( scalar(@_) < 4 ) {
+        my $new_indices = 4 - scalar(@_);
+        for ( my $i = 1 ; $i < $new_indices ; $i++ ) {
+            if ( $i == $new_indices ) {
+                push @_, {};
+            }
+            else {
+                push @_, '';
+            }
+        }
+    }
+
     $_[3]->{quote_names} = 1;
 
     return $self->next::method(@_);
