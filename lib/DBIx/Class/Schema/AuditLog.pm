@@ -16,6 +16,21 @@ __PACKAGE__->mk_classdata('audit_log_storage_type');
 
 =head1 DBIx::Class OVERRIDDEN METHODS
 
+=head2 connect
+
+Enable quote_names so that any possible reserved names of columns in the
+Audit Log Schema are protected.
+
+=cut
+
+sub connect {
+    my $self = shift;
+
+    $_[3]->{quote_names} = 1;
+
+    return $self->next::method(@_);
+}
+
 =head2 connection
 
 Overrides the DBIx::Class connection method to create an AuditLog schema.
