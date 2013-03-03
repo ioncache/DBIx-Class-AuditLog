@@ -25,15 +25,13 @@ if you are planing to use L<DBIx::Class::ResultSet/delete> or L<DBIx::Class::Res
 modules which make use of these methods (like L<HTML::FormHandler> or L<DBIx::Class::ResultSet::RecursiveUpdate>, 
 load the AuditLog-component in your ResultSet classes:
 
- package My::Schema::ResultSet::Table;
+    package My::Schema::ResultSet::Table;
 
+    use base 'DBIx::Class::ResultSet';
 
- use base 'DBIx::Class::ResultSet';
+    __PACKAGE__->load_components('ResultSet::AuditLog');
 
-
- __PACKAGE__->load_components('ResultSet::AuditLog');
-
- 1;
+    1;
 
 If you need auditing in all your tables, an alternative way is to set "DBIC::ResultSet::AuditLog" as your
 default resultset class in load_components. See L<DBIx::Class::ResultSet::AuditLog> for details.

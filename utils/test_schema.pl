@@ -10,16 +10,23 @@ use AuditTest::Schema;
 use DBIx::Class::AuditLog;
 
 my $schema = AuditTest::Schema->connect( "DBI:mysql:database=audit_test",
-    "root", "angU1da", { RaiseError => 1, PrintError => 1 } );
+    "root", $ARGV[0], { RaiseError => 1, PrintError => 1 } );
 
-#my $user = $schema->resultset('User')->first();
-#p $user;
+my $al_schema;
 
-#$schema->audit_log_schema->deploy;
+# deploy the audit log schema if it's not installed
+try {
+    $al_schema = $schema->audit_log_schema;
+    my $changesets = $al_schema->resultset('AuditLogChangeset')->all;
+}
+catch {
+    $al_schema->deploy;
+};
 
+my $user_01;
 $schema->txn_do(
     sub {
-        $schema->resultset('User')->create(
+        $user_01 = $schema->resultset('User')->create(
             {   name  => "JohnSample",
                 email => 'jsample@sample.com',
                 phone => '999-888-7777',
@@ -33,21 +40,18 @@ $schema->txn_do(
 
 $schema->txn_do(
     sub {
-        my $user
-            = $schema->resultset('User')->search( { name => "JohnSample" } )
-            ->first;
-        $user->email('johnsample@sample.com');
-        $user->update();
+        $user_01->phone('111-222-3333');
+        $user_01->update();
     },
-    {   description => "updating username: JaneSample",
+    {   description => "updating phone of JohnSample",
         user        => "TestAdminUser",
     },
 );
 
+
 $schema->txn_do(
     sub {
-        $schema->resultset('User')->search( { name => "JohnSample" } )
-            ->first->delete;
+        $user_01->delete;
     },
     {   description => "delete user: JohnSample",
         user        => "YetAnotherAdminUser",
@@ -66,9 +70,11 @@ $schema->txn_do(
     { description => "adding new user: TehPwnerer -- no admin user", },
 );
 
+my $superman;
+my $spiderman;
 $schema->txn_do(
     sub {
-        my $superman = $schema->resultset('User')->create(
+        $superman = $schema->resultset('User')->create(
             {   name  => "Superman",
                 email => 'ckent@dailyplanet.com',
                 phone => '123-456-7890',
@@ -80,7 +86,7 @@ $schema->txn_do(
                 phone => '123-456-7890',
             }
         );
-        my $spiderman = $schema->resultset('User')->create(
+        $spiderman = $schema->resultset('User')->create(
             {   name  => "Spiderman",
                 email => 'ppaker@dailybugle.com',
                 phone => '987-654-3210',
@@ -134,5 +140,18 @@ my $atbdu = $schema->resultset('User')->create(
 );
 
 $atbdu->delete;
+
+
+# basic test of get_changes
+my $changes = $al_schema->get_changes({ id => $user_01->id, table => 'user', change_order => 'asc' });
+
+while ( my $change = $changes->next ) {
+    say "*" x 50;
+    say "Time:   " . $change->Action->Changeset->timestamp;
+    say "Action: " . $change->Action->type;
+    say "Field:  " . $change->Field->name;
+    say "Old:    " . ($change->old_value ? $change->old_value : '');
+    say "New:    " . ($change->new_value ? $change->new_value : '');
+}
 
 1;
