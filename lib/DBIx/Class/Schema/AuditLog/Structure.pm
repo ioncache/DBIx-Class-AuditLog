@@ -198,7 +198,7 @@ sub get_changes {
         }
 
         my $changes = $actions->search_related( 'Change', $criteria,
-            { order_by => 'me.id ' . $change_order, } );
+            { order_by => { "-$change_order" => 'me.id' } } );
         return $changes;
     }
 
