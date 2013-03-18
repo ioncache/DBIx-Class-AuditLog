@@ -201,7 +201,7 @@ An L<AuditLogChangeset|DBIx::Class::Schema::AuditLog::Structure::Changeset> is a
 
     mysql> select * from audit_log_changeset order by id;
     +----+----------------------------------------------+---------------------+---------+
-    | id | description                                  | last_modified       | user_id |
+    | id | description                                  | created_on          | user_id |
     +----+----------------------------------------------+---------------------+---------+
     |  1 | adding new user: JohnSample                  | 2012-06-22 17:16:25 |       1 |
     |  2 | updating username: JaneSample                | 2012-06-22 17:16:25 |       1 |
@@ -331,7 +331,7 @@ The Audit Log schema can be accessed from your main schema by calling the audit_
 
 =item Required: id, table
 
-=item Optional: action_type, change_order, field, last_modified
+=item Optional: action_type, change_order, field, created_on
 
 =item Returns: DBIC resultset
 
@@ -341,12 +341,12 @@ A convenience method for reading changes from the Audit Log.
 
     my $al_schema = $schema->audit_log_schema;
     my $changes = $al_schema->get_changes({
-        id            => 1,
-        table         => 'foo',
-        field         => 'bar',           # optional
-        action_type   => 'insert',        # optional, 1 of insert, update, delete
-        last_modified => { '>=', $time }, # optional, $time must be a DateTime object,
-        change_order  => 'asc',           # optional, 1 of asc, desc
+        id           => 1,
+        table        => 'foo',
+        field        => 'bar',           # optional
+        action_type  => 'insert',        # optional, 1 of insert, update, delete
+        created_on   => { '>=', $time }, # optional, $time must be a DateTime object,
+        change_order => 'asc',           # optional, 1 of asc, desc
     });
 
 =head1 TODO

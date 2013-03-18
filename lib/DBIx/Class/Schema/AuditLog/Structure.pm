@@ -141,7 +141,7 @@ Optional:
     change_order: sets the order to return the results, either asc, or desc
                   defaults to desc
     field: name of the field that was audited
-    last_modified: timestamp of the changeset to search by
+    created_on: timestamp of the changeset to search by
                takes a standard dbic where clause for a field,
                eg:
                    '2012-07-09-15.25.18'
@@ -159,7 +159,7 @@ sub get_changes {
     my $change_order = $options->{change_order} || 'desc';
     my $field_name   = $options->{field};
     my $table_name   = $options->{table};
-    my $timestamp    = $options->{last_modified};
+    my $timestamp    = $options->{created_on};
     my $action_types = $options->{action_types}
         || [ 'insert', 'update', 'delete' ];
 
@@ -173,7 +173,7 @@ sub get_changes {
     return unless defined $table;
 
     my $changeset_criteria = {};
-    $changeset_criteria->{last_modified} = $timestamp if $timestamp;
+    $changeset_criteria->{created_on} = $timestamp if $timestamp;
     my $changesets = $self->resultset('AuditLogChangeset')
         ->search_rs( $changeset_criteria );
 
