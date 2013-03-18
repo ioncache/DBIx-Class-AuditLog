@@ -38,10 +38,10 @@ ok !$phonefield , 'AuditLogField "phone" NOT created';
 
 my $namefield = $al_schema->resultset('AuditLogField')->find({name => 'name'});
 ok $namefield , 'AuditLogField "name" created';
-ok $action->Change_rs->find({field => $namefield->id}), 'changed name column logged';
+ok $action->Change_rs->find({field_id => $namefield->id}), 'changed name column logged';
 
 my $mailfield = $al_schema->resultset('AuditLogField')->find({name => 'email'});
 ok $mailfield , 'AuditLogField "email" created';
-ok $action->Change_rs->find({field => $mailfield->id}), 'changed mail column logged';
+ok $action->Change_rs->find({field_id => $mailfield->id}), 'changed mail column logged';
 
 done_testing();

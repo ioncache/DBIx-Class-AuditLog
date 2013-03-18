@@ -56,7 +56,7 @@ subtest 'validate changeset after create with ru' => sub {
     my $cset = $changesets->find(1);
     is( $cset->Action->count, 6, 'six actions in changeset' );
     foreach ( $cset->Action->all ) {
-        is( $_->type, 'insert', 'all actions are inserts' );
+        is( $_->action_type, 'insert', 'all actions are inserts' );
     }
 };
 
@@ -77,9 +77,9 @@ subtest 'validate changeset after first update with ru' => sub{
 
     my $cset = $changesets->find(2);
     is($cset->Action->count, 5, 'five actions in changeset');
-    is($cset->Action->search({type => 'delete'})->count, 2, 'two delete actions');
-    is($cset->Action->search({type => 'insert'})->count, 2, 'two insert actions');
-    is($cset->Action->search({type => 'update'})->count, 1, 'one update action');
+    is($cset->Action->search({action_type => 'delete'})->count, 2, 'two delete actions');
+    is($cset->Action->search({action_type => 'insert'})->count, 2, 'two insert actions');
+    is($cset->Action->search({action_type => 'update'})->count, 1, 'one update action');
 };
 
 $book_data = {
@@ -105,9 +105,9 @@ subtest 'validate changeset after first update with ru' => sub{
 
     my $cset = $changesets->find(3);
     is($cset->Action->count, 5, 'five actions in changeset');
-    is($cset->Action->search({type => 'delete'})->count, 1, 'one delete action');
-    is($cset->Action->search({type => 'insert'})->count, 3, 'three insert actions');
-    is($cset->Action->search({type => 'update'})->count, 1, 'one update action');
+    is($cset->Action->search({action_type => 'delete'})->count, 1, 'one delete action');
+    is($cset->Action->search({action_type => 'insert'})->count, 3, 'three insert actions');
+    is($cset->Action->search({action_type => 'update'})->count, 1, 'one update action');
 };
 
 $book_data = {
@@ -130,8 +130,8 @@ subtest 'validate changeset after second update with ru' => sub{
 
     my $cset = $changesets->find(4);
     is($cset->Action->count, 6, 'six actions in changeset');
-    is($cset->Action->search({type => 'update'})->count, 2, 'two update action');
-    is($cset->Action->search({type => 'delete'})->count, 2, 'two delete action');
-    is($cset->Action->search({type => 'insert'})->count, 2, 'two insert action');
+    is($cset->Action->search({action_type => 'update'})->count, 2, 'two update action');
+    is($cset->Action->search({action_type => 'delete'})->count, 2, 'two delete action');
+    is($cset->Action->search({action_type => 'insert'})->count, 2, 'two insert action');
 };
 

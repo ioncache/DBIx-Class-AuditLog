@@ -86,24 +86,24 @@ subtest 'validate changeset after create_related' => sub{
     my $changes = $action->Change;
     is($changes->count, 3, 'three changes logged');
 
-    my $id_field = $al_schema->resultset('AuditLogField')->find({name => 'id', audited_table => 1});
+    my $id_field = $al_schema->resultset('AuditLogField')->find({name => 'id', audited_table_id => 1});
     isa_ok($id_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    my $id_change = $changes->find({field => $id_field->id});
+    my $id_change = $changes->find({field_id => $id_field->id});
     isa_ok($id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $id_change->old_value, 'id field has no old value');
 
-    my $isbn_field = $al_schema->resultset('AuditLogField')->find({name => 'isbn', audited_table => 1});
+    my $isbn_field = $al_schema->resultset('AuditLogField')->find({name => 'isbn', audited_table_id => 1});
     isa_ok($isbn_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    my $isbn_change = $changes->find({field => $isbn_field->id});
+    my $isbn_change = $changes->find({field_id => $isbn_field->id});
     isa_ok($isbn_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $isbn_change->old_value, 'isbn field has no old value');
 
-    my $title_id_field = $al_schema->resultset('AuditLogField')->find({name => 'title_id', audited_table => 1});
+    my $title_id_field = $al_schema->resultset('AuditLogField')->find({name => 'title_id', audited_table_id => 1});
     isa_ok($title_id_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    my $title_id_change = $changes->find({field => $title_id_field->id});
+    my $title_id_change = $changes->find({field_id => $title_id_field->id});
     isa_ok($title_id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $title_id_change->old_value, 'title_id field has no old value');
     is($title_id_change->new_value, $title1->id, 'new value for title_id is set correctly');
@@ -127,18 +127,18 @@ subtest 'validate changeset after add_to_$rel' => sub{
     is($changes->count, 2, 'two changes logged');
 
     my $bookauthor_table = $al_schema->resultset('AuditLogAuditedTable')->find({name => 'bookauthor'});
-    my $author_id_field = $al_schema->resultset('AuditLogField')->find({name => 'author_id', audited_table => $bookauthor_table->id});
+    my $author_id_field = $al_schema->resultset('AuditLogField')->find({name => 'author_id', audited_table_id => $bookauthor_table->id});
     isa_ok($author_id_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    my $author_id_change = $changes->find({field => $author_id_field->id});
+    my $author_id_change = $changes->find({field_id => $author_id_field->id});
     isa_ok($author_id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $author_id_change->old_value, 'author_id field has no old value');
     is( $author_id_change->new_value, 1, 'author_id field has correct new value');
 
-    my $book_id_field = $al_schema->resultset('AuditLogField')->find({name => 'book_id', audited_table => $bookauthor_table->id});
+    my $book_id_field = $al_schema->resultset('AuditLogField')->find({name => 'book_id', audited_table_id => $bookauthor_table->id});
     isa_ok($book_id_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    my $book_id_change = $changes->find({field => $book_id_field->id});
+    my $book_id_change = $changes->find({field_id => $book_id_field->id});
     isa_ok($book_id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $book_id_change->old_value, 'book_id field has no old value');
     is( $book_id_change->new_value, $new_book->id, 'book_id field has correct new value');
@@ -159,62 +159,62 @@ subtest 'validate changeset after set_$rel' => sub{
     is($changesets->find(4)->Action->count, 3, "three actions in changeset after set_rel");
 
     my $bookauthor_table = $al_schema->resultset('AuditLogAuditedTable')->find({name => 'bookauthor'});
-    my $author_id_field = $al_schema->resultset('AuditLogField')->find({name => 'author_id', audited_table => $bookauthor_table->id});
-    my $book_id_field = $al_schema->resultset('AuditLogField')->find({name => 'book_id', audited_table => $bookauthor_table->id});
+    my $author_id_field = $al_schema->resultset('AuditLogField')->find({name => 'author_id', audited_table_id => $bookauthor_table->id});
+    my $book_id_field = $al_schema->resultset('AuditLogField')->find({name => 'book_id', audited_table_id => $bookauthor_table->id});
     my $actions = $changesets->find(4)->Action;
     my $action = $actions->next;
     is($action->AuditedTable->name, 'bookauthor', 'BookAuthor-table audited');
-    is($action->type, 'delete', 'first action is "delete"');
+    is($action->action_type, 'delete', 'first action is "delete"');
 
     my $changes = $action->Change;
     is($changes->count, 2, 'two changes logged');
     isa_ok($author_id_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    my $author_id_change = $changes->find({field => $author_id_field->id});
+    my $author_id_change = $changes->find({field_id => $author_id_field->id});
     isa_ok($author_id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $author_id_change->new_value, 'author_id field has no new value in "delete"');
     is( $author_id_change->old_value, 1, 'author_id field has correct old value in "delete"');
     isa_ok($book_id_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    my $book_id_change = $changes->find({field => $book_id_field->id});
+    my $book_id_change = $changes->find({field_id => $book_id_field->id});
     isa_ok($book_id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $book_id_change->new_value, 'book_id field has no new value in "delete"');
     is( $book_id_change->old_value, 4, 'book_id field has correct old value in "delete"');
 
     $action = $actions->next;
     is($action->AuditedTable->name, 'bookauthor', 'BookAuthor-table audited');
-    is($action->type, 'insert', 'second action is "insert"');
+    is($action->action_type, 'insert', 'second action is "insert"');
 
     $changes = $action->Change;
     is($changes->count, 2, 'two changes logged');
     isa_ok($author_id_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    $author_id_change = $changes->find({field => $author_id_field->id});
+    $author_id_change = $changes->find({field_id => $author_id_field->id});
     isa_ok($author_id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $author_id_change->old_value, 'author_id field has no old value in "insert"');
     is( $author_id_change->new_value, 2, 'author_id field has correct new value in "insert"');
     isa_ok($book_id_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    $book_id_change = $changes->find({field => $book_id_field->id});
+    $book_id_change = $changes->find({field_id => $book_id_field->id});
     isa_ok($book_id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $book_id_change->old_value, 'book_id field has no old value in "insert"');
     is( $book_id_change->new_value, $new_book->id, 'book_id field has correct new value in "insert"');
 
     $action = $actions->next;
     is($action->AuditedTable->name, 'bookauthor', 'BookAuthor-table audited');
-    is($action->type, 'insert', 'second action is "insert"');
+    is($action->action_type, 'insert', 'second action is "insert"');
 
     $changes = $action->Change;
     is($changes->count, 2, 'two changes logged');
     isa_ok($author_id_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    $author_id_change = $changes->find({field => $author_id_field->id});
+    $author_id_change = $changes->find({field_id => $author_id_field->id});
     isa_ok($author_id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $author_id_change->old_value, 'author_id field has no old value in "insert"');
     is( $author_id_change->new_value, 1, 'author_id field has correct new value in "insert"');
     isa_ok($book_id_field, 'DBIx::Class::Schema::AuditLog::Structure::Field');
 
-    $book_id_change = $changes->find({field => $book_id_field->id});
+    $book_id_change = $changes->find({field_id => $book_id_field->id});
     isa_ok($book_id_change, 'DBIx::Class::Schema::AuditLog::Structure::Change');
     ok(! $book_id_change->old_value, 'book_id field has no old value in "insert"');
     is( $book_id_change->new_value, $new_book->id, 'book_id field has correct new value in "insert"');

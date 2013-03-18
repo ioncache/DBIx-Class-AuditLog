@@ -13,11 +13,11 @@ __PACKAGE__->add_columns(
         'is_auto_increment' => 1,
         'is_nullable'       => 0,
     },
-    'action' => {
+    'action_id' => {
         'data_type'   => 'integer',
         'is_nullable' => 0,
     },
-    'field' => {
+    'field_id' => {
         'data_type'   => 'integer',
         'is_nullable' => 0,
     },
@@ -38,13 +38,13 @@ __PACKAGE__->set_primary_key('id');
 __PACKAGE__->belongs_to(
     'Action',
     'DBIx::Class::Schema::AuditLog::Structure::Action',
-    { 'foreign.id' => 'self.action' },
+    { 'foreign.id' => 'self.action_id' },
 );
 
 __PACKAGE__->belongs_to(
     'Field',
     'DBIx::Class::Schema::AuditLog::Structure::Field',
-    { 'foreign.id' => 'self.field' },
+    { 'foreign.id' => 'self.field_id' },
 );
 
 1;
