@@ -32,11 +32,14 @@ sub update {
     return $self->next::method(@_) if !$enabled;
 
     my $stored_row      = $self->get_from_storage;
-    my %old_data        = $stored_row->get_columns;
     my %new_data        = $self->get_columns;
     my @changed_columns = keys %{ $_[0] || {} };
 
     my $result = $self->next::method(@_);
+
+    return unless $stored_row; # update on deleted row - nothing to log
+
+    my %old_data = $stored_row->get_columns;
 
     if (@changed_columns) {
         @new_data{@changed_columns} = map $self->get_column($_),
