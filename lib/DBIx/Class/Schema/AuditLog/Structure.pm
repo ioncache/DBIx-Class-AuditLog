@@ -74,9 +74,9 @@ sub audit_log_create_changeset {
 
     my ( $changeset, $user );
 
-    if ( $changeset_data->{user} ) {
+    if ( $changeset_data->{user_id} ) {
         $user = $self->resultset('AuditLogUser')
-            ->find_or_create( { name => $changeset_data->{user} } );
+            ->find_or_create( { name => $changeset_data->{user_id} } );
 
         $changeset = $user->create_related( 'Changeset',
             { description => $changeset_data->{description} } );
@@ -112,9 +112,9 @@ sub audit_log_create_action {
             $self->resultset('AuditLogChangeset')->find($changeset)
                 ->create_related(
                 'Action',
-                {   audited_row   => $action_data->{row},
-                    audited_table => $table->id,
-                    type          => $action_data->{type},
+                {   audited_row      => $action_data->{row},
+                    audited_table_id => $table->id,
+                    action_type      => $action_data->{action_type},
                 }
                 ),
             $table
@@ -141,7 +141,7 @@ Optional:
     change_order: sets the order to return the results, either asc, or desc
                   defaults to desc
     field: name of the field that was audited
-    timestamp: timestamp of the changeset to search by
+    created_on: timestamp of the changeset to search by
                takes a standard dbic where clause for a field,
                eg:
                    '2012-07-09-15.25.18'
@@ -159,7 +159,7 @@ sub get_changes {
     my $change_order = $options->{change_order} || 'desc';
     my $field_name   = $options->{field};
     my $table_name   = $options->{table};
-    my $timestamp    = $options->{timestamp};
+    my $timestamp    = $options->{created_on};
     my $action_types = $options->{action_types}
         || [ 'insert', 'update', 'delete' ];
 
@@ -173,15 +173,15 @@ sub get_changes {
     return unless defined $table;
 
     my $changeset_criteria = {};
-    $changeset_criteria->{timestamp} = $timestamp if $timestamp;
+    $changeset_criteria->{created_on} = $timestamp if $timestamp;
     my $changesets = $self->resultset('AuditLogChangeset')
         ->search_rs( $changeset_criteria );
 
     my $actions = $changesets->search_related(
         'Action',
-        {   audited_table => $table->id,
-            audited_row   => $audited_row,
-            type          => $action_types,
+        {   audited_table_id => $table->id,
+            audited_row      => $audited_row,
+            action_type      => $action_types,
         }
     );
 
@@ -194,7 +194,7 @@ sub get_changes {
         # 0 is returned
         my $criteria = {};
         if ( $field_name ) {
-            $criteria->{field} = $field ? $field->id : -1;
+            $criteria->{field_id} = $field ? $field->id : -1;
         }
 
         my $changes = $actions->search_related( 'Change', $criteria,

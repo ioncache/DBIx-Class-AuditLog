@@ -25,7 +25,7 @@ $schema->txn_do(
         );
     },
     {   description => "adding new user: JohnSample",
-        user        => "TestAdminUser01",
+        user_id     => "TestAdminUser01",
     },
 );
 
@@ -42,7 +42,7 @@ subtest 'CREATE Tests' => sub {
             "adding new user: JohnSample",
         "AuditLogChangeset has correct description"
     );
-    ok( $al_user->Changeset->first->Action->first->type eq "insert",
+    ok( $al_user->Changeset->first->Action->first->action_type eq "insert",
         "AuditLogAction has correct type" );
     ok( $al_user->Changeset->first->Action->first->Change,
         "AuditLogChange(s) found for CREATE" );
@@ -61,7 +61,7 @@ $schema->txn_do(
             ->update( { name => 'JaneSample', } );
     },
     {   description => "updating user: JohnSample",
-        user        => "TestAdminUser02",
+        user_id     => "TestAdminUser02",
     },
 );
 
@@ -78,7 +78,7 @@ subtest 'UPDATE Tests' => sub {
             "updating user: JohnSample",
         "AuditLogChangeset has correct description"
     );
-    ok( $al_user->Changeset->first->Action->first->type eq "update",
+    ok( $al_user->Changeset->first->Action->first->action_type eq "update",
         "AuditLogAction has correct type" );
     ok( $al_user->Changeset->first->Action->first->Change->first->old_value eq
             'JohnSample',
@@ -99,7 +99,7 @@ $schema->txn_do(
             ->delete;
     },
     {   description => "deleting user: JaneSample",
-        user        => "TestAdminUser03",
+        user_id     => "TestAdminUser03",
     },
 );
 
@@ -116,7 +116,7 @@ subtest 'DELETE Tests' => sub {
             "deleting user: JaneSample",
         "AuditLogChangeset has correct description"
     );
-    ok( $al_user->Changeset->first->Action->first->type eq "delete",
+    ok( $al_user->Changeset->first->Action->first->action_type eq "delete",
         "AuditLogAction has correct type" );
     ok( $al_user->Changeset->first->Action->first->Change->first->old_value eq
             'JaneSample',
@@ -144,7 +144,7 @@ subtest 'DELETE Tests' => sub {
             );
         },
         {   description => "adding new user: Lary Wall",
-            user        => "TestAdminUser04",
+            user_id     => "TestAdminUser04",
         },
     );
 
@@ -168,7 +168,7 @@ $schema->txn_do(
         }
     },
     {   description => "updating user: Lary Wall -> name = Damian Conway",
-        user        => "TestAdminUser05",
+        user_id     => "TestAdminUser05",
     },
 );
     

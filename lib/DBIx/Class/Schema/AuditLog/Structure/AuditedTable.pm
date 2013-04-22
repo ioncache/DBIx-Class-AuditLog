@@ -29,13 +29,13 @@ __PACKAGE__->add_unique_constraint( [qw/name/] );
 __PACKAGE__->has_many(
     'Field',
     'DBIx::Class::Schema::AuditLog::Structure::Field',
-    { 'foreign.audited_table' => 'self.id' },
+    { 'foreign.audited_table_id' => 'self.id' },
 );
 
 __PACKAGE__->has_many(
     'Action',
     'DBIx::Class::Schema::AuditLog::Structure::Action',
-    { 'foreign.audited_table' => 'self.id' },
+    { 'foreign.audited_table_id' => 'self.id' },
 );
 
 1;
