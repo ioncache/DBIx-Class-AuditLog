@@ -1,35 +1,67 @@
 #!/usr/bin/env perl
+
 use strict;
 use warnings;
-use Getopt::Long::Descriptive;
-use DBI;
 
-my ($opt, $usage) = describe_options(
+use DBI;
+use Getopt::Long::Descriptive;
+use Try::Tiny;
+
+my ( $opt, $usage ) = describe_options(
     "$0 %o",
     [ 'dsn|s=s',  'Database source name (dsn) to connect to' ],
     [ 'user|u=s', 'Database username' ],
     [ 'pass|p=s', 'Database password' ],
     [],
-    [ 'help|h',   'Print usage message and exit' ],
+    [ 'help|h', 'Print usage message and exit' ],
 );
 
-print($usage->text), exit if $opt->help or !$opt->dsn;
+print( $usage->text ), exit if $opt->help or !$opt->dsn;
 
-my $dbh = DBI->connect($opt->dsn, $opt->user, $opt->pass, { RaiseError => 1, AutoCommit => 1 }) 
+my $dbh
+    = DBI->connect( $opt->dsn, $opt->user, $opt->pass,
+    { RaiseError => 1, AutoCommit => 0 } )
     or die $DBI::errstr;
 
-my %update = map { $_ => \&$_ } ('pg', 'mysql', 'default');
-
-if ( my $code_ref = $update{lc $dbh->{Driver}{Name}} ) {
+try {
+    my %update = map { $_ => \&$_ } qw/ default mysql pg /;
+    my $code_ref = $update{ lc $dbh->{Driver}{Name} } || $update{'default'};
     $code_ref->($dbh);
+    $dbh->commit;
 }
-else {
-    die "Could not find update statements for " . $dbh->{Driver}{Name};
+catch {
+    warn "Database definition update aborted: $_";
+    $dbh->rollback;
+};
+
+sub default {
+    my $dbh = shift;
+    my @sql = (
+
+        # audit_log_changeset
+        'ALTER TABLE audit_log_changeset RENAME COLUMN "USER" TO "USER_ID"',
+        'ALTER TABLE audit_log_changeset RENAME COLUMN "TIMESTAMP" TO "CREATED_ON"',
+
+        # audit_log_action
+        'ALTER TABLE audit_log_action RENAME COLUMN "CHANGESET" TO "CHANGESET_ID"',
+        'ALTER TABLE audit_log_action RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
+        'ALTER TABLE audit_log_action RENAME COLUMN "TYPE" TO "ACTION_TYPE"',
+
+        # audit_log_change
+        'ALTER TABLE audit_log_change RENAME COLUMN "ACTION" TO "ACTION_ID"',
+        'ALTER TABLE audit_log_change RENAME COLUMN "FIELD" TO "FIELD_ID"',
+
+        # audit_log_field
+        'ALTER TABLE audit_log_field RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
+    );
+
+    $dbh->do($_) for @sql;
 }
 
 sub pg {
     my $dbh = shift;
     my @sql = (
+
         # audit_log_changeset
         'ALTER TABLE audit_log_changeset RENAME COLUMN "user" TO "user_id"',
         'ALTER TABLE audit_log_changeset RENAME COLUMN "timestamp" TO "created_on"',
@@ -54,6 +86,7 @@ sub mysql {
     my $dbh = shift;
 
     my @sql = (
+
         # audit_log_changeset
         'ALTER TABLE `audit_log_changeset` DROP FOREIGN KEY `audit_log_changeset_fk_user`',
         'ALTER TABLE `audit_log_changeset` CHANGE COLUMN `timestamp` `created_on` TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -87,7 +120,7 @@ sub mysql {
         # audit_log_change
         'ALTER TABLE `audit_log_change` DROP FOREIGN KEY `audit_log_change_fk_action`',
         'ALTER TABLE `audit_log_change` DROP FOREIGN KEY `audit_log_change_fk_field`',
-        
+
         'ALTER TABLE `audit_log_change` CHANGE COLUMN `action` `action_id` INTEGER  NOT NULL,
             CHANGE COLUMN `field` `field_id` INTEGER  NOT NULL,
             DROP INDEX `audit_log_change_idx_action`,
@@ -105,7 +138,7 @@ sub mysql {
 
         # audit_log_field
         'ALTER TABLE `audit_log_field` DROP FOREIGN KEY `audit_log_field_fk_audited_table`',
-        
+
         'ALTER TABLE `audit_log_field` CHANGE COLUMN `audited_table` `audited_table_id` INTEGER  NOT NULL,
             DROP INDEX `audit_log_field_idx_audited_table`,
             ADD INDEX `audit_log_field_idx_audited_table` USING BTREE(`audited_table_id`),
@@ -113,29 +146,6 @@ sub mysql {
                 REFERENCES `audit_log_table` (`id`)
                 ON DELETE CASCADE
                 ON UPDATE CASCADE',
-    );
-
-    $dbh->do($_) for @sql;
-}
-
-sub oracle {
-    my $dbh = shift;
-    my @sql = (
-        # audit_log_changeset
-        'ALTER TABLE audit_log_changeset RENAME COLUMN "USER" TO "USER_ID"',
-        'ALTER TABLE audit_log_changeset RENAME COLUMN "TIMESTAMP" TO "CREATED_ON"',
-
-        # audit_log_action
-        'ALTER TABLE audit_log_action RENAME COLUMN "CHANGESET" TO "CHANGESET_ID"',
-        'ALTER TABLE audit_log_action RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
-        'ALTER TABLE audit_log_action RENAME COLUMN "TYPE" TO "ACTION_TYPE"',
-
-        # audit_log_change
-        'ALTER TABLE audit_log_change RENAME COLUMN "ACTION" TO "ACTION_ID"',
-        'ALTER TABLE audit_log_change RENAME COLUMN "FIELD" TO "FIELD_ID"',
-
-        # audit_log_field
-        'ALTER TABLE audit_log_field RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
     );
 
     $dbh->do($_) for @sql;
