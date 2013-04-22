@@ -20,12 +20,12 @@ __PACKAGE__->add_columns(
         'is_nullable' => 1,
         'size'        => 255,
     },
-    'timestamp' => {
+    'created_on' => {
         'data_type'     => 'timestamp',
         'set_on_create' => 1,
         'is_nullable'   => 0,
     },
-    'user' => {
+    'user_id' => {
         'data_type'   => 'integer',
         'is_nullable' => 1,
     },
@@ -36,13 +36,13 @@ __PACKAGE__->set_primary_key('id');
 __PACKAGE__->belongs_to(
     'User',
     'DBIx::Class::Schema::AuditLog::Structure::User',
-    { 'foreign.id' => 'self.user' },
+    { 'foreign.id' => 'self.user_id' },
 );
 
 __PACKAGE__->has_many(
     'Action',
     'DBIx::Class::Schema::AuditLog::Structure::Action',
-    { 'foreign.changeset' => 'self.id' },
+    { 'foreign.changeset_id' => 'self.id' },
 );
 
 1;

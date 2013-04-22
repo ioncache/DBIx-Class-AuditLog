@@ -27,7 +27,7 @@ __PACKAGE__->add_unique_constraint( constraint_name => [qw/name/], );
 __PACKAGE__->has_many(
     'Changeset',
     'DBIx::Class::Schema::AuditLog::Structure::Changeset',
-    { 'foreign.user' => 'self.id' },
+    { 'foreign.user_id' => 'self.id' },
 );
 
 1;

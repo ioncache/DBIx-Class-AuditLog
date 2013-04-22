@@ -1,3 +1,12 @@
+0.4.3 - XXXX
+
+    Fixed:
+    - quote_names is removed and not enabled by default from Audit Log
+    - user and timestamp in Changeset.pm are reserved words by many databases. They are renamed to user_id and created_on. In order to keep the foreign names consistent, all foreign key columns have suffix id, ex. field_id, action_id, changeset_id and etc.
+
+    Updated:
+    - Version 0.4.3 breaks backward compability, because of the changing column names. An util script is added into the utils/ directory in order to update existing database schemas.
+
 0.4.2 - 2013/03/03
 
     New:

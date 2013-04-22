@@ -27,7 +27,7 @@ $schema->txn_do(
         );
     },
     {   description => "adding new user: JohnSample",
-        user        => "TestAdminUser",
+        user_id     => "TestAdminUser",
     },
 );
 
@@ -40,7 +40,7 @@ $schema->txn_do(
         $user->update();
     },
     {   description => "updating username: JaneSample",
-        user        => "TestAdminUser",
+        user_id     => "TestAdminUser",
     },
 );
 
@@ -50,7 +50,7 @@ $schema->txn_do(
             ->first->delete;
     },
     {   description => "delete user: JohnSample",
-        user        => "YetAnotherAdminUser",
+        user_id     => "YetAnotherAdminUser",
     },
 );
 
@@ -98,7 +98,7 @@ $schema->txn_do(
             { name => 'TehPwnerer', phone => '416-123-4567' } );
     },
     {   description => "multi-action changeset",
-        user        => "ioncache",
+        user_id     => "ioncache",
     },
 );
 
@@ -120,7 +120,7 @@ $schema->txn_do(
         $schema->resultset('User')->search( { name => "Drunk hulk" } )
             ->first->update( { email => 'drunkhulk@everywhere.com' } );
     },
-    { user => "markj", },
+    { user_id => "markj", },
 );
 
 $schema->resultset('User')->search( { name => "NonChangesetUser" } )

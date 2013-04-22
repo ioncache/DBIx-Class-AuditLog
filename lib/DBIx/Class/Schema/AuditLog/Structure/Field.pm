@@ -13,7 +13,7 @@ __PACKAGE__->add_columns(
         'is_auto_increment' => 1,
         'is_nullable'       => 0,
     },
-    'audited_table' => {
+    'audited_table_id' => {
         'data_type'   => 'integer',
         'is_nullable' => 0,
     },
@@ -29,13 +29,13 @@ __PACKAGE__->set_primary_key('id');
 __PACKAGE__->belongs_to(
     'AuditedTable',
     'DBIx::Class::Schema::AuditLog::Structure::AuditedTable',
-    { 'foreign.id' => 'self.audited_table' },
+    { 'foreign.id' => 'self.audited_table_id' },
 );
 
 __PACKAGE__->has_many(
     'Change',
     'DBIx::Class::Schema::AuditLog::Structure::Change',
-    { 'foreign.field' => 'self.id' },
+    { 'foreign.field_id' => 'self.id' },
 );
 
 1;
