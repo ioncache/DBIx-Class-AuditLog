@@ -18,15 +18,15 @@ my @supported_dbs = qw/
 
 my ( $opt, $usage ) = describe_options(
     "$0 %o",
-    [ 'db_version|d=dbv', 'Database version (mainly for a local DB2 v8 instance -- optional' ],
-    [ 'dsn|d=s',    'Database source name (dsn) to connect to -- required' ],
-    [ 'execute|e',  'Execute the database update -- Otherwise will just rollback' ],
-    [ 'schema|s=s', 'Database schema -- optional' ],
-    [ 'pass|p=s',   'Database password -- optional' ],
-    [ 'trace|t',    'Enable DBI_TRACE -- optional' ],
-    [ 'user|u=s',   'Database username -- optional' ],
+    [ 'db_version|b=s', 'Database version (mainly for a local DB2 v8 instance) -- optional' ],
+    [ 'dsn|d=s',        'Database source name (dsn) to connect to -- required' ],
+    [ 'execute|e',      'Execute the database update -- otherwise will just rollback' ],
+    [ 'schema|s=s',     'Database schema -- optional' ],
+    [ 'pass|p=s',       'Database password -- optional' ],
+    [ 'trace|t',        'Enable DBI_TRACE -- optional' ],
+    [ 'user|u=s',       'Database username -- optional' ],
     [],
-    [ 'help|h', 'Print usage message and exit' ],
+    [ 'help|h',         'Print usage message and exit' ],
 );
 
 print( $usage->text ), exit if $opt->help or !$opt->dsn;
