@@ -4,7 +4,7 @@ DBIx::Class::AuditLog - Simple activity audit logging for DBIx::Class
 
 =head1 SYNOPSIS
 
-NOTE: As of v0.5.0 some of the foreign key column names are changed and 'quote_names' is no longer enabled by default. This is to ensure that any of the table or column names used by the Audit Log don't conflict with any reserved words from any database.  And update_reserved_columns.pl script has been included in the /utils folder of the package to help with upgrading.  Sorry for the inconvenience.  If this script fails for you, then you may need to add specific sql to it for your particular brand of DB.
+NOTE: As of v0.5.0 some of the foreign key column names are changed and 'quote_names' is no longer enabled by default. This is to ensure that any of the table or column names used by the Audit Log don't conflict with any reserved words from any database.  An update_reserved_columns.pl script has been included in the /utils folder of the package to help with upgrading.  Sorry for the inconvenience.  If this script fails for you, then you may need to add specific sql to it for your particular brand of DB.
 
 Enable the AuditLog schema component in your L<DBIx::Class::Schema> class file:
 
