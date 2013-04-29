@@ -4,7 +4,7 @@ DBIx::Class::AuditLog - Simple activity audit logging for DBIx::Class
 
 =head1 SYNOPSIS
 
-NOTE: As of v0.4.3 some of the foreign key column names are changed and 'quote_names' is no longer enabled by default. This is to ensure that any of the table or column names used by the Audit Log don't conflict with any reserved words from any database.
+NOTE: As of v0.5.0 some of the foreign key column names are changed and 'quote_names' is no longer enabled by default. This is to ensure that any of the table or column names used by the Audit Log don't conflict with any reserved words from any database.  And update_reserved_columns.pl script has been included in the /utils folder of the package to help with upgrading.  Sorry for the inconvenience.  If this script fails for you, then you may need to add specific sql to it for your particular brand of DB.
 
 Enable the AuditLog schema component in your L<DBIx::Class::Schema> class file:
 
@@ -22,14 +22,12 @@ Enable the AuditLog component in your the individual L<DBIx::Class> table class 
 
 If you want to use methods created by L<DBIx::Class::Relationship::Base>, like "add_to_$rel" or "set_$rel",
 if you are planing to use L<DBIx::Class::ResultSet/delete> or L<DBIx::Class::ResultSet/update> or if you use
-modules which make use of these methods (like L<HTML::FormHandler> or L<DBIx::Class::ResultSet::RecursiveUpdate>, 
+modules which make use of these methods (like L<HTML::FormHandler> or L<DBIx::Class::ResultSet::RecursiveUpdate>,
 load the AuditLog-component in your ResultSet classes:
 
     package My::Schema::ResultSet::Table;
 
-
     use base 'DBIx::Class::ResultSet';
-
 
     __PACKAGE__->load_components('ResultSet::AuditLog');
 
@@ -92,11 +90,11 @@ If you are using a DBIx::Class generated schema, and don't want to modify the co
         "+admin_id",
         { audit_log_column => 0, }
     );
-    
+
 =head2 force_audit_log_column
 
 By default, columns are only audited if their value changed.
-It is possible to force auditing on a per-column basis by setting 
+It is possible to force auditing on a per-column basis by setting
 'force_audit_log_column' to 1:
 
     __PACKAGE__->add_columns(
@@ -105,7 +103,7 @@ It is possible to force auditing on a per-column basis by setting
     );
 
 If auditing is forced for a column, the 'audit_log_column' attribute is ignored.
-    
+
 =head2 modify_audit_value
 
 It is possible to modify the values stored by DBIC::AuditLog on a per-column basis
@@ -132,14 +130,14 @@ passing a coderef:
         return $value;
     }, }
     );
-    
+
 passing a method name:
 
     __PACKAGE__->add_columns(
         "+name",
-        { modify_audit_value => 'to_lowercase'}, 
+        { modify_audit_value => 'to_lowercase'},
     );
-    
+
     sub to_lowercase{
         my ($self, $value) = @_;
         $value =~ tr/A-Z/a-z/;
@@ -150,9 +148,9 @@ passing a true value which is NOT a method name:
 
     __PACKAGE__->add_columns(
         "+name",
-        { modify_audit_value => 1}, 
+        { modify_audit_value => 1},
     );
-    
+
     sub modify_audit_name{
         my ($self, $value) = @_;
         $value =~ tr/A-Z/a-z/;
@@ -194,7 +192,7 @@ This table does not get a relationship to any table in your main schema.
     |  4 | markj               |
     +----+---------------------+
     4 rows in set (0.01 sec)
-    
+
 =item Changeset
 
 An L<AuditLogChangeset|DBIx::Class::Schema::AuditLog::Structure::Changeset> is an identifier for a transaction.  It can have many L<Actions|DBIx::Class::Schema::AuditLog::Structure::Action>.  It can optionally be owned by a L<User|DBIx::Class::Schema::AuditLog::Structure::User>.  And optionally have a description.
@@ -216,7 +214,7 @@ An L<AuditLogChangeset|DBIx::Class::Schema::AuditLog::Structure::Changeset> is a
 
 An L<AuditLogAction|DBIx::Class::Schema::AuditLog::Structure::Action> is an insert/update/delete belonging to a L<Changeset|DBIx::Class::Schema::AuditLog::Structure::Changeset>.  It is also owned by L<Table|DBIx::Class::Schema::AuditLog::Structure::AuditedTable>.
 
-If the corresponding table has more than one primary key, the pk-values stored in 'audited_row' are joined with a '-'. 
+If the corresponding table has more than one primary key, the pk-values stored in 'audited_row' are joined with a '-'.
 (See action with id 11 below.)
 
     mysql> select * from audit_log_action order by id;
@@ -295,7 +293,7 @@ An L<AuditLogField|DBIx::Class::Schema::AuditLog::Structure::Field> contains a u
     |  3 |                1 | phone |
     +----+------------------+-------+
     3 rows in set (0.00 sec)
-    
+
 =back
 
 =head1 DEPLOYMENT
@@ -304,7 +302,7 @@ To deploy an AuditLog schema, load your main schema, and then run the deploy com
 
     my $schema = AuditTest::Schema->connect( "DBI:mysql:database=audit_test",
         "root", "somepassword", { RaiseError => 1, PrintError => 0 } );
-    
+
     $schema->audit_log_schema->deploy;
 
 The db user that is deploying the schema must have the correct create table permissions.

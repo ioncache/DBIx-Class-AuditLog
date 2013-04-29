@@ -1,59 +1,213 @@
 #!/usr/bin/env perl
+
 use strict;
 use warnings;
-use Getopt::Long::Descriptive;
-use DBI;
 
-my ($opt, $usage) = describe_options(
+use Carp;
+use DBI;
+use Getopt::Long::Descriptive;
+use Try::Tiny;
+
+my @supported_dbs = qw/
+    db2
+    default
+    mysql
+    oracle
+    pg
+/;
+
+my ( $opt, $usage ) = describe_options(
     "$0 %o",
-    [ 'dsn|s=s',  'Database source name (dsn) to connect to' ],
-    [ 'user|u=s', 'Database username' ],
-    [ 'pass|p=s', 'Database password' ],
+    [ 'db_version|b=s', 'Database version (mainly for a local DB2 v8 instance) -- optional' ],
+    [ 'dsn|d=s',        'Database source name (dsn) to connect to -- required' ],
+    [ 'execute|e',      'Execute the database update -- otherwise will just rollback' ],
+    [ 'schema|s=s',     'Database schema -- optional' ],
+    [ 'pass|p=s',       'Database password -- optional' ],
+    [ 'trace|t',        'Enable DBI_TRACE -- optional' ],
+    [ 'user|u=s',       'Database username -- optional' ],
     [],
-    [ 'help|h',   'Print usage message and exit' ],
+    [ 'help|h',         'Print usage message and exit' ],
 );
 
-print($usage->text), exit if $opt->help or !$opt->dsn;
+print( $usage->text ), exit if $opt->help or !$opt->dsn;
 
-my $dbh = DBI->connect($opt->dsn, $opt->user, $opt->pass, { RaiseError => 1, AutoCommit => 1 }) 
-    or die $DBI::errstr;
-
-my %update = map { $_ => \&$_ } ('pg', 'mysql', 'default');
-
-if ( my $code_ref = $update{lc $dbh->{Driver}{Name}} ) {
-    $code_ref->($dbh);
-}
-else {
-    die "Could not find update statements for " . $dbh->{Driver}{Name};
+my $schema_attributes = {
+    AutoCommit => 0,
+    RaiseError => 1,
+};
+if ( $opt->dsn =~ m/db2/i ) {
+    $schema_attributes->{db2_set_schema} = $opt->schema
+        or croak "***** Must supply a schema for db2.";
 }
 
-sub pg {
+my $dbh
+    = DBI->connect( $opt->dsn, $opt->user, $opt->pass, $schema_attributes )
+    or croak "***** Error connection to db:\n" . $DBI::errstr;
+
+DBI->trace(1) if $opt->trace;
+
+try {
+    my %update = map { $_ => \&$_ } @supported_dbs;
+    my $code_ref = $update{ lc($dbh->{Driver}{Name}) } || $update{'default'};
+    if ( $code_ref ) {
+        $code_ref->($dbh);
+        if ( $opt->execute ) {
+           $dbh->commit;
+        }
+        else {
+            print "***** Rolling back changes as the 'execute' paramter was not passed.\n";
+            $dbh->rollback;
+        }
+    }
+    else {
+        print "***** Database '" . lc($dbh->{Driver}{Name}) . "' not supported.\n";
+    }
+}
+catch {
+    carp "***** Database definition update aborted: $_";
+    $dbh->rollback;
+}
+finally {
+    $dbh->disconnect;
+};
+
+sub default {
     my $dbh = shift;
+    print "Executing 'default' database update.\n";
     my @sql = (
+
         # audit_log_changeset
-        'ALTER TABLE audit_log_changeset RENAME COLUMN "user" TO "user_id"',
-        'ALTER TABLE audit_log_changeset RENAME COLUMN "timestamp" TO "created_on"',
+        'ALTER TABLE audit_log_changeset RENAME COLUMN "USER" TO "USER_ID"',
+        'ALTER TABLE audit_log_changeset RENAME COLUMN "TIMESTAMP" TO "CREATED_ON"',
 
         # audit_log_action
-        'ALTER TABLE audit_log_action RENAME COLUMN "changeset" TO "changeset_id"',
-        'ALTER TABLE audit_log_action RENAME COLUMN "audited_table" TO "audited_table_id"',
-        'ALTER TABLE audit_log_action RENAME COLUMN "type" TO "action_type"',
+        'ALTER TABLE audit_log_action RENAME COLUMN "CHANGESET" TO "CHANGESET_ID"',
+        'ALTER TABLE audit_log_action RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
+        'ALTER TABLE audit_log_action RENAME COLUMN "TYPE" TO "ACTION_TYPE"',
 
         # audit_log_change
-        'ALTER TABLE audit_log_change RENAME COLUMN "action" TO "action_id"',
-        'ALTER TABLE audit_log_change RENAME COLUMN "field" TO "field_id"',
+        'ALTER TABLE audit_log_change RENAME COLUMN "ACTION" TO "ACTION_ID"',
+        'ALTER TABLE audit_log_change RENAME COLUMN "FIELD" TO "FIELD_ID"',
 
         # audit_log_field
-        'ALTER TABLE audit_log_field RENAME COLUMN "audited_table" TO "audited_table_id"',
+        'ALTER TABLE audit_log_field RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
     );
+
+    $dbh->do($_) for @sql;
+}
+
+sub db2 {
+    my $dbh = shift;
+    print "Executing 'db2' database update.\n";
+    my @sql;
+    if ( $opt->db_version && $opt->db_version =~ /8\.?/ ) {
+        @sql = (
+            ### DROP ALL FOEIGN KEY INDEXES
+    
+            'DROP INDEX "' . ($opt->schema) . '"."AL_CS_IDX_U"',
+            'DROP INDEX "' . ($opt->schema) . '"."AL_A_IDX_AT"',
+            'DROP INDEX "' . ($opt->schema) . '"."AL_A_IDX_CS"',
+            'DROP INDEX "' . ($opt->schema) . '"."AL_C_IDX_A"',
+            'DROP INDEX "' . ($opt->schema) . '"."AL_C_IDX_F"',
+            'DROP INDEX "' . ($opt->schema) . '"."AL_F_IDX_AT"',
+    
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" DROP FOREIGN KEY "AL_CS_FK_U"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    DROP FOREIGN KEY "AL_A_FK_AT"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    DROP FOREIGN KEY "AL_A_FK_CS"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    DROP FOREIGN KEY "AL_C_FK_A"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    DROP FOREIGN KEY "AL_C_FK_F"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     DROP FOREIGN KEY "AL_F_FK_AT"',
+    
+            ### ALTER TABLE STRTURES
+    
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "USER"          TO "USER_ID"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "TIMESTAMP"     TO "CREATED_ON"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    RENAME COLUMN "CHANGESET"     TO "CHANGESET_ID"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    RENAME COLUMN "TYPE"          TO "ACTION_TYPE"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    RENAME COLUMN "ACTION"        TO "ACTION_ID"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    RENAME COLUMN "FIELD"         TO "FIELD_ID"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
+    
+            #### RE-ADD THE INDEXES AND CONSTRAINTS
+    
+            # add the foreign key indexes
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"       ON "FXSCHEMA"."AUDIT_LOG_CHANGESET" ( "USER_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_FIELD_IDX_AUDITED_TABLE"  ON "FXSCHEMA"."AUDIT_LOG_FIELD"     ( "AUDITED_TABLE_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_AUDITED_TABLE" ON "FXSCHEMA"."AUDIT_LOG_ACTION"    ( "AUDITED_TABLE_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_CHANGESET"     ON "FXSCHEMA"."AUDIT_LOG_ACTION"    ( "CHANGESET_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_ACTION"        ON "FXSCHEMA"."AUDIT_LOG_CHANGE"    ( "ACTION_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_FIELD"         ON "FXSCHEMA"."AUDIT_LOG_CHANGE"    ( "FIELD_ID" )',
+    
+            # add the foreign keys
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ADD CONSTRAINT AUDIT_LOG_CHANGESET_FK_USER       FOREIGN KEY ("USER_ID")          REFERENCES AUDIT_LOG_USER("ID")      ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     ADD CONSTRAINT AUDIT_LOG_FIELD_FK_AUDITED_TABLE  FOREIGN KEY ("AUDITED_TABLE_ID") REFERENCES AUDIT_LOG_TABLE("ID")     ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ADD CONSTRAINT AUDIT_LOG_ACTION_FK_AUDITED_TABLE FOREIGN KEY ("AUDITED_TABLE_ID") REFERENCES AUDIT_LOG_TABLE("ID")     ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ADD CONSTRAINT AUDIT_LOG_ACTION_FK_CHANGESET     FOREIGN KEY ("CHANGESET_ID")     REFERENCES AUDIT_LOG_CHANGESET("ID") ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ADD CONSTRAINT AUDIT_LOG_CHANGE_FK_ACTION        FOREIGN KEY ("ACTION_ID")        REFERENCES AUDIT_LOG_ACTION("ID")    ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ADD CONSTRAINT AUDIT_LOG_CHANGE_FK_FIELD         FOREIGN KEY ("FIELD_ID")         REFERENCES AUDIT_LOG_FIELD("ID")     ON DELETE CASCADE',
+        );
+    }
+    else {
+        @sql = (
+            ### DROP ALL FOEIGN KEY INDEXES
+    
+            'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"',
+            'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_AUDITED_TABLE"',
+            'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_CHANGESET"',
+            'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_ACTION"',
+            'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_FIELD"',
+            'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_FIELD_IDX_AUDITED_TABLE"',
+    
+            ### DROP ALL FOREIGN KEYS
+    
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" DROP FOREIGN KEY "AUDIT_LOG_CHANGESET_FK_USER"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    DROP FOREIGN KEY "AUDIT_LOG_ACTION_FK_AUDITED_TABLE"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    DROP FOREIGN KEY "AUDIT_LOG_ACTION_FK_CHANGESET"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    DROP FOREIGN KEY "AUDIT_LOG_CHANGE_FK_ACTION"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    DROP FOREIGN KEY "AUDIT_LOG_CHANGE_FK_FIELD"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     DROP FOREIGN KEY "AUDIT_LOG_FIELD_FK_AUDITED_TABLE"',
+    
+    
+            ### ALTER TABLE STRTURES
+    
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "USER"          TO "USER_ID"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "TIMESTAMP"     TO "CREATED_ON"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    RENAME COLUMN "CHANGESET"     TO "CHANGESET_ID"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    RENAME COLUMN "TYPE"          TO "ACTION_TYPE"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    RENAME COLUMN "ACTION"        TO "ACTION_ID"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    RENAME COLUMN "FIELD"         TO "FIELD_ID"',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
+    
+            #### RE-ADD THE INDEXES AND CONSTRAINTS
+    
+            # add the foreign key indexes
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"       ON "FXSCHEMA"."AUDIT_LOG_CHANGESET" ( "USER_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_FIELD_IDX_AUDITED_TABLE"  ON "FXSCHEMA"."AUDIT_LOG_FIELD"     ( "AUDITED_TABLE_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_AUDITED_TABLE" ON "FXSCHEMA"."AUDIT_LOG_ACTION"    ( "AUDITED_TABLE_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_CHANGESET"     ON "FXSCHEMA"."AUDIT_LOG_ACTION"    ( "CHANGESET_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_ACTION"        ON "FXSCHEMA"."AUDIT_LOG_CHANGE"    ( "ACTION_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_FIELD"         ON "FXSCHEMA"."AUDIT_LOG_CHANGE"    ( "FIELD_ID" )',
+    
+            # add the foreign keys
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ADD CONSTRAINT AUDIT_LOG_CHANGESET_FK_USER       FOREIGN KEY ("USER_ID")          REFERENCES AUDIT_LOG_USER("ID")      ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     ADD CONSTRAINT AUDIT_LOG_FIELD_FK_AUDITED_TABLE  FOREIGN KEY ("AUDITED_TABLE_ID") REFERENCES AUDIT_LOG_TABLE("ID")     ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ADD CONSTRAINT AUDIT_LOG_ACTION_FK_AUDITED_TABLE FOREIGN KEY ("AUDITED_TABLE_ID") REFERENCES AUDIT_LOG_TABLE("ID")     ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ADD CONSTRAINT AUDIT_LOG_ACTION_FK_CHANGESET     FOREIGN KEY ("CHANGESET_ID")     REFERENCES AUDIT_LOG_CHANGESET("ID") ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ADD CONSTRAINT AUDIT_LOG_CHANGE_FK_ACTION        FOREIGN KEY ("ACTION_ID")        REFERENCES AUDIT_LOG_ACTION("ID")    ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ADD CONSTRAINT AUDIT_LOG_CHANGE_FK_FIELD         FOREIGN KEY ("FIELD_ID")         REFERENCES AUDIT_LOG_FIELD("ID")     ON DELETE CASCADE',
+        );
+    }
 
     $dbh->do($_) for @sql;
 }
 
 sub mysql {
     my $dbh = shift;
-
+    print "Executing 'mysql' database update.\n";
     my @sql = (
+
         # audit_log_changeset
         'ALTER TABLE `audit_log_changeset` DROP FOREIGN KEY `audit_log_changeset_fk_user`',
         'ALTER TABLE `audit_log_changeset` CHANGE COLUMN `timestamp` `created_on` TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -87,7 +241,7 @@ sub mysql {
         # audit_log_change
         'ALTER TABLE `audit_log_change` DROP FOREIGN KEY `audit_log_change_fk_action`',
         'ALTER TABLE `audit_log_change` DROP FOREIGN KEY `audit_log_change_fk_field`',
-        
+
         'ALTER TABLE `audit_log_change` CHANGE COLUMN `action` `action_id` INTEGER  NOT NULL,
             CHANGE COLUMN `field` `field_id` INTEGER  NOT NULL,
             DROP INDEX `audit_log_change_idx_action`,
@@ -105,7 +259,7 @@ sub mysql {
 
         # audit_log_field
         'ALTER TABLE `audit_log_field` DROP FOREIGN KEY `audit_log_field_fk_audited_table`',
-        
+
         'ALTER TABLE `audit_log_field` CHANGE COLUMN `audited_table` `audited_table_id` INTEGER  NOT NULL,
             DROP INDEX `audit_log_field_idx_audited_table`,
             ADD INDEX `audit_log_field_idx_audited_table` USING BTREE(`audited_table_id`),
@@ -120,7 +274,9 @@ sub mysql {
 
 sub oracle {
     my $dbh = shift;
+    print "Executing 'oracle' database update.\n";
     my @sql = (
+
         # audit_log_changeset
         'ALTER TABLE audit_log_changeset RENAME COLUMN "USER" TO "USER_ID"',
         'ALTER TABLE audit_log_changeset RENAME COLUMN "TIMESTAMP" TO "CREATED_ON"',
@@ -136,6 +292,31 @@ sub oracle {
 
         # audit_log_field
         'ALTER TABLE audit_log_field RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
+    );
+
+    $dbh->do($_) for @sql;
+}
+
+sub pg {
+    my $dbh = shift;
+    print "Executing 'pg' database update.\n";
+    my @sql = (
+
+        # audit_log_changeset
+        'ALTER TABLE audit_log_changeset RENAME COLUMN "user" TO "user_id"',
+        'ALTER TABLE audit_log_changeset RENAME COLUMN "timestamp" TO "created_on"',
+
+        # audit_log_action
+        'ALTER TABLE audit_log_action RENAME COLUMN "changeset" TO "changeset_id"',
+        'ALTER TABLE audit_log_action RENAME COLUMN "audited_table" TO "audited_table_id"',
+        'ALTER TABLE audit_log_action RENAME COLUMN "type" TO "action_type"',
+
+        # audit_log_change
+        'ALTER TABLE audit_log_change RENAME COLUMN "action" TO "action_id"',
+        'ALTER TABLE audit_log_change RENAME COLUMN "field" TO "field_id"',
+
+        # audit_log_field
+        'ALTER TABLE audit_log_field RENAME COLUMN "audited_table" TO "audited_table_id"',
     );
 
     $dbh->do($_) for @sql;
