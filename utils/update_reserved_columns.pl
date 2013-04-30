@@ -102,7 +102,7 @@ sub db2 {
     my @sql;
     if ( $opt->db_version && $opt->db_version =~ /8\.?/ ) {
         @sql = (
-            ### DROP ALL FOEIGN KEY INDEXES
+            ### DROP ALL FOREIGN KEY INDEXES
     
             'DROP INDEX "' . ($opt->schema) . '"."AL_CS_IDX_U"',
             'DROP INDEX "' . ($opt->schema) . '"."AL_A_IDX_AT"',
@@ -132,12 +132,12 @@ sub db2 {
             #### RE-ADD THE INDEXES AND CONSTRAINTS
     
             # add the foreign key indexes
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"       ON "FXSCHEMA"."AUDIT_LOG_CHANGESET" ( "USER_ID" )',
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_FIELD_IDX_AUDITED_TABLE"  ON "FXSCHEMA"."AUDIT_LOG_FIELD"     ( "AUDITED_TABLE_ID" )',
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_AUDITED_TABLE" ON "FXSCHEMA"."AUDIT_LOG_ACTION"    ( "AUDITED_TABLE_ID" )',
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_CHANGESET"     ON "FXSCHEMA"."AUDIT_LOG_ACTION"    ( "CHANGESET_ID" )',
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_ACTION"        ON "FXSCHEMA"."AUDIT_LOG_CHANGE"    ( "ACTION_ID" )',
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_FIELD"         ON "FXSCHEMA"."AUDIT_LOG_CHANGE"    ( "FIELD_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"       ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ( "USER_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_FIELD_IDX_AUDITED_TABLE"  ON "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     ( "AUDITED_TABLE_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_AUDITED_TABLE" ON "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ( "AUDITED_TABLE_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_CHANGESET"     ON "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ( "CHANGESET_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_ACTION"        ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ( "ACTION_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_FIELD"         ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ( "FIELD_ID" )',
     
             # add the foreign keys
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ADD CONSTRAINT AUDIT_LOG_CHANGESET_FK_USER       FOREIGN KEY ("USER_ID")          REFERENCES AUDIT_LOG_USER("ID")      ON DELETE CASCADE',
@@ -150,7 +150,7 @@ sub db2 {
     }
     else {
         @sql = (
-            ### DROP ALL FOEIGN KEY INDEXES
+            ### DROP ALL FOREIGN KEY INDEXES
     
             'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"',
             'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_AUDITED_TABLE"',
@@ -183,12 +183,12 @@ sub db2 {
             #### RE-ADD THE INDEXES AND CONSTRAINTS
     
             # add the foreign key indexes
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"       ON "FXSCHEMA"."AUDIT_LOG_CHANGESET" ( "USER_ID" )',
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_FIELD_IDX_AUDITED_TABLE"  ON "FXSCHEMA"."AUDIT_LOG_FIELD"     ( "AUDITED_TABLE_ID" )',
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_AUDITED_TABLE" ON "FXSCHEMA"."AUDIT_LOG_ACTION"    ( "AUDITED_TABLE_ID" )',
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_CHANGESET"     ON "FXSCHEMA"."AUDIT_LOG_ACTION"    ( "CHANGESET_ID" )',
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_ACTION"        ON "FXSCHEMA"."AUDIT_LOG_CHANGE"    ( "ACTION_ID" )',
-            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_FIELD"         ON "FXSCHEMA"."AUDIT_LOG_CHANGE"    ( "FIELD_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"       ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ( "USER_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_FIELD_IDX_AUDITED_TABLE"  ON "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     ( "AUDITED_TABLE_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_AUDITED_TABLE" ON "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ( "AUDITED_TABLE_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_CHANGESET"     ON "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ( "CHANGESET_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_ACTION"        ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ( "ACTION_ID" )',
+            'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_FIELD"         ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ( "FIELD_ID" )',
     
             # add the foreign keys
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ADD CONSTRAINT AUDIT_LOG_CHANGESET_FK_USER       FOREIGN KEY ("USER_ID")          REFERENCES AUDIT_LOG_USER("ID")      ON DELETE CASCADE',
