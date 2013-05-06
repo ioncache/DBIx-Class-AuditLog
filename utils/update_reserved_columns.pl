@@ -42,7 +42,7 @@ if ( $opt->dsn =~ m/db2/i ) {
 
 my $dbh
     = DBI->connect( $opt->dsn, $opt->user, $opt->pass, $schema_attributes )
-    or croak "***** Error connection to db:\n" . $DBI::errstr;
+    or croak "***** Error connecting to db:\n" . $DBI::errstr;
 
 DBI->trace(1) if $opt->trace;
 
@@ -55,7 +55,7 @@ try {
            $dbh->commit;
         }
         else {
-            print "***** Rolling back changes as the 'execute' paramter was not passed.\n";
+            print "***** Rolling back changes as the 'execute' parameter was not passed.\n";
             $dbh->rollback;
         }
     }
@@ -111,6 +111,8 @@ sub db2 {
             'DROP INDEX "' . ($opt->schema) . '"."AL_C_IDX_F"',
             'DROP INDEX "' . ($opt->schema) . '"."AL_F_IDX_AT"',
     
+            ### DROP ALL FOREIGN KEYS
+
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" DROP FOREIGN KEY "AL_CS_FK_U"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    DROP FOREIGN KEY "AL_A_FK_AT"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    DROP FOREIGN KEY "AL_A_FK_CS"',
@@ -118,7 +120,7 @@ sub db2 {
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    DROP FOREIGN KEY "AL_C_FK_F"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     DROP FOREIGN KEY "AL_F_FK_AT"',
     
-            ### ALTER TABLE STRTURES
+            ### ALTER TABLE STRUCTURE
     
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "USER"          TO "USER_ID"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "TIMESTAMP"     TO "CREATED_ON"',
@@ -169,7 +171,7 @@ sub db2 {
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     DROP FOREIGN KEY "AUDIT_LOG_FIELD_FK_AUDITED_TABLE"',
     
     
-            ### ALTER TABLE STRTURES
+            ### ALTER TABLE STRUCTURE
     
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "USER"          TO "USER_ID"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "TIMESTAMP"     TO "CREATED_ON"',
