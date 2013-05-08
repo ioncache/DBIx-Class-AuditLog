@@ -37,6 +37,7 @@ __PACKAGE__->belongs_to(
     'User',
     'DBIx::Class::Schema::AuditLog::Structure::User',
     { 'foreign.id' => 'self.user_id' },
+    { join_type => 'left' },
 );
 
 __PACKAGE__->has_many(
