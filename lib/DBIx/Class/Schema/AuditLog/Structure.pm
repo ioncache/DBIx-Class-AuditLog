@@ -180,8 +180,13 @@ sub get_changes {
 
     my $changeset_criteria = {};
     $changeset_criteria->{created_on} = $timestamp if $timestamp;
-    my $changesets = $self->resultset('AuditLogChangeset')
-        ->search_rs( $changeset_criteria, { prefetch => 'Action' } );
+    my $changesets = $self->resultset('AuditLogChangeset')->search_rs(
+        $changeset_criteria,
+        {   '+columns' => ['User.name'],
+            join       => ['User'],
+            prefetch   => 'Action'
+        }
+    );
 
     my $actions = $changesets->search_related(
         'Action',
