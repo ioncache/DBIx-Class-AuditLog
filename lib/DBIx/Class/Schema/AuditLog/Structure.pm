@@ -74,9 +74,11 @@ sub audit_log_create_changeset {
 
     my ( $changeset, $user );
 
-    if ( $changeset_data->{user_id} ) {
+    my $user_id = $changeset_data->{user_id} || $changeset_data->{user};
+
+    if ( $user_id ) {
         $user = $self->resultset('AuditLogUser')
-            ->find_or_create( { name => $changeset_data->{user_id} } );
+            ->find_or_create( { name => $user_id } );
 
         $changeset = $user->create_related( 'Changeset',
             { description => $changeset_data->{description} } );
@@ -166,8 +168,12 @@ sub get_changes {
     # row and table are required for all changes
     return if !$audited_row || !$table_name;
 
+    my $table_criteria = { prefetch => 'Field' }
+        if $field_name;
     my $table = $self->resultset('AuditLogAuditedTable')
-        ->find( { name => $table_name, } );
+        ->find( { name => $table_name }, $table_criteria );
+    my $field = $table->find_related( 'Field', { name => $field_name } )
+        if $field_name;
 
     # cannot get changes if the specified table hasn't been logged
     return unless defined $table;
@@ -175,20 +181,18 @@ sub get_changes {
     my $changeset_criteria = {};
     $changeset_criteria->{created_on} = $timestamp if $timestamp;
     my $changesets = $self->resultset('AuditLogChangeset')
-        ->search_rs( $changeset_criteria );
+        ->search_rs( $changeset_criteria, { prefetch => 'Action' } );
 
     my $actions = $changesets->search_related(
         'Action',
-        {   audited_table_id => $table->id,
-            audited_row      => $audited_row,
-            action_type      => $action_types,
-        }
+        {   'Action.audited_table_id' => $table->id,
+            'Action.audited_row'      => $audited_row,
+            'Action.action_type'      => $action_types,
+        },
+        { prefetch => 'Change' }
     );
 
-    if ( $actions && $actions->count ) {
-        my $field = $table->find_related( 'Field', { name => $field_name } )
-            if $field_name;
-
+    if ( $actions != 0 ) {
         # if field is passed and the passed field wasn't found in the Field
         # table set field id to -1 to ensure a $changes object with ->count =
         # 0 is returned
@@ -197,12 +201,19 @@ sub get_changes {
             $criteria->{field_id} = $field ? $field->id : -1;
         }
 
-        my $changes = $actions->search_related( 'Change', $criteria,
-            { order_by => { "-$change_order" => 'me.id' } } );
+        my $changes = $actions->search_related(
+            'Change',
+            $criteria,
+            {   order_by   => { "-$change_order" => 'me.id' },
+                '+columns' => ['Field.name'],
+                join       => ['Field']
+            }
+        );
         return $changes;
     }
 
     return;
+
 }
 
 1;
