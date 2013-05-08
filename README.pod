@@ -45,7 +45,7 @@ In your application wrap any insert/update/delete in a transaction to have audit
         }
     );
 
-Optionally pass an extra hashref to the txn_do method to indicate a user and/or a description for the transaction:
+Optionally pass an extra hashref to the txn_do method to indicate a user (or user_id) and/or a description for the transaction:
 
     $my_schema->txn_do(
         sub {
@@ -56,6 +56,8 @@ Optionally pass an extra hashref to the txn_do method to indicate a user and/or 
             description => 'description of transaction' # optional
         }
     );
+
+The user/user_id will be stored in AuditLogUser->name.
 
 =head1 DESCRIPTION
 

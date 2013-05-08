@@ -42,6 +42,10 @@ foreach my $field (@change_fields) {
             . "', new_value = '"
             . ( $change->new_value ? $change->new_value : '' ) . "'"
     );
+    ok( defined $change->Action->Changeset->User
+             && $change->Action->Changeset->User->name eq 'TestAdminUser01',
+        "Changes properly attributed to user 'TestAdminUser01'"
+    );
 }
 
 $al_schema->resultset('AuditLogChangeset')->delete_all;
@@ -74,14 +78,11 @@ foreach my $field (@change_fields) {
 
 $al_schema->resultset('AuditLogChangeset')->delete_all;
 
-
-
 $schema->txn_do(
     sub {
         $test_user->delete;
     },
     {   description => "deleting user: JaneSample",
-        user        => "TestAdminUser03",
     },
 );
 
@@ -93,6 +94,9 @@ foreach my $field (@change_fields) {
             . ( $change->old_value ? $change->old_value : '' )
             . "', new_value = '"
             . ( $change->new_value ? $change->new_value : '' ) . "'"
+    );
+    ok( !defined $change->Action->Changeset->User,
+        "Changes properly not attributed to any user"
     );
 }
 
