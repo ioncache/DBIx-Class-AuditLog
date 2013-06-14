@@ -182,10 +182,7 @@ sub get_changes {
     my $changeset_criteria = {};
     $changeset_criteria->{created_on} = $timestamp if $timestamp;
     my $changesets = $self->resultset('AuditLogChangeset')->search_rs(
-        $changeset_criteria,
-        {
-            prefetch   => 'User'
-        }
+        $changeset_criteria
     );
 
     my $actions = $changesets->search_related(
@@ -209,7 +206,7 @@ sub get_changes {
             'Change',
             $criteria,
             {   order_by   => { "-$change_order" => 'me.id' },
-                prefetch   => [{ 'Action' => 'Changeset'}, { 'Field' => 'AuditedTable' }],
+                prefetch   => [{ 'Action' => { 'Changeset' => 'User' } }, { 'Field' => 'AuditedTable' }],
             }
         );
         return $changes;
