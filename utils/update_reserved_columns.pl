@@ -110,7 +110,7 @@ sub db2 {
             'DROP INDEX "' . ($opt->schema) . '"."AL_C_IDX_A"',
             'DROP INDEX "' . ($opt->schema) . '"."AL_C_IDX_F"',
             'DROP INDEX "' . ($opt->schema) . '"."AL_F_IDX_AT"',
-    
+
             ### DROP ALL FOREIGN KEYS
 
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" DROP FOREIGN KEY "AL_CS_FK_U"',
@@ -119,9 +119,9 @@ sub db2 {
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    DROP FOREIGN KEY "AL_C_FK_A"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    DROP FOREIGN KEY "AL_C_FK_F"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     DROP FOREIGN KEY "AL_F_FK_AT"',
-    
+
             ### ALTER TABLE STRUCTURE
-    
+
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "USER"          TO "USER_ID"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "TIMESTAMP"     TO "CREATED_ON"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    RENAME COLUMN "CHANGESET"     TO "CHANGESET_ID"',
@@ -130,9 +130,9 @@ sub db2 {
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    RENAME COLUMN "ACTION"        TO "ACTION_ID"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    RENAME COLUMN "FIELD"         TO "FIELD_ID"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
-    
+
             #### RE-ADD THE INDEXES AND CONSTRAINTS
-    
+
             # add the foreign key indexes
             'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"       ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ( "USER_ID" )',
             'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_FIELD_IDX_AUDITED_TABLE"  ON "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     ( "AUDITED_TABLE_ID" )',
@@ -140,7 +140,7 @@ sub db2 {
             'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_CHANGESET"     ON "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ( "CHANGESET_ID" )',
             'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_ACTION"        ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ( "ACTION_ID" )',
             'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_FIELD"         ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ( "FIELD_ID" )',
-    
+
             # add the foreign keys
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ADD CONSTRAINT AUDIT_LOG_CHANGESET_FK_USER       FOREIGN KEY ("USER_ID")          REFERENCES AUDIT_LOG_USER("ID")      ON DELETE CASCADE',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     ADD CONSTRAINT AUDIT_LOG_FIELD_FK_AUDITED_TABLE  FOREIGN KEY ("AUDITED_TABLE_ID") REFERENCES AUDIT_LOG_TABLE("ID")     ON DELETE CASCADE',
@@ -153,24 +153,23 @@ sub db2 {
     else {
         @sql = (
             ### DROP ALL FOREIGN KEY INDEXES
-    
+
             'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"',
             'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_AUDITED_TABLE"',
             'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_CHANGESET"',
             'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_ACTION"',
             'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_FIELD"',
             'DROP INDEX "' . ($opt->schema) . '"."AUDIT_LOG_FIELD_IDX_AUDITED_TABLE"',
-    
+
             ### DROP ALL FOREIGN KEYS
-    
+
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" DROP FOREIGN KEY "AUDIT_LOG_CHANGESET_FK_USER"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    DROP FOREIGN KEY "AUDIT_LOG_ACTION_FK_AUDITED_TABLE"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    DROP FOREIGN KEY "AUDIT_LOG_ACTION_FK_CHANGESET"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    DROP FOREIGN KEY "AUDIT_LOG_CHANGE_FK_ACTION"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    DROP FOREIGN KEY "AUDIT_LOG_CHANGE_FK_FIELD"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     DROP FOREIGN KEY "AUDIT_LOG_FIELD_FK_AUDITED_TABLE"',
-    
-    
+
             ### ALTER TABLE STRUCTURE
     
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "USER"          TO "USER_ID"',
@@ -181,9 +180,9 @@ sub db2 {
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    RENAME COLUMN "ACTION"        TO "ACTION_ID"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    RENAME COLUMN "FIELD"         TO "FIELD_ID"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     RENAME COLUMN "AUDITED_TABLE" TO "AUDITED_TABLE_ID"',
-    
+
             #### RE-ADD THE INDEXES AND CONSTRAINTS
-    
+
             # add the foreign key indexes
             'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET_IDX_USER"       ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ( "USER_ID" )',
             'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_FIELD_IDX_AUDITED_TABLE"  ON "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     ( "AUDITED_TABLE_ID" )',
@@ -191,14 +190,14 @@ sub db2 {
             'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_ACTION_IDX_CHANGESET"     ON "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ( "CHANGESET_ID" )',
             'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_ACTION"        ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ( "ACTION_ID" )',
             'CREATE INDEX "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE_IDX_FIELD"         ON "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ( "FIELD_ID" )',
-    
+
             # add the foreign keys
-            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ADD CONSTRAINT AUDIT_LOG_CHANGESET_FK_USER       FOREIGN KEY ("USER_ID")          REFERENCES AUDIT_LOG_USER("ID")      ON DELETE CASCADE',
-            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     ADD CONSTRAINT AUDIT_LOG_FIELD_FK_AUDITED_TABLE  FOREIGN KEY ("AUDITED_TABLE_ID") REFERENCES AUDIT_LOG_TABLE("ID")     ON DELETE CASCADE',
-            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ADD CONSTRAINT AUDIT_LOG_ACTION_FK_AUDITED_TABLE FOREIGN KEY ("AUDITED_TABLE_ID") REFERENCES AUDIT_LOG_TABLE("ID")     ON DELETE CASCADE',
-            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ADD CONSTRAINT AUDIT_LOG_ACTION_FK_CHANGESET     FOREIGN KEY ("CHANGESET_ID")     REFERENCES AUDIT_LOG_CHANGESET("ID") ON DELETE CASCADE',
-            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ADD CONSTRAINT AUDIT_LOG_CHANGE_FK_ACTION        FOREIGN KEY ("ACTION_ID")        REFERENCES AUDIT_LOG_ACTION("ID")    ON DELETE CASCADE',
-            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ADD CONSTRAINT AUDIT_LOG_CHANGE_FK_FIELD         FOREIGN KEY ("FIELD_ID")         REFERENCES AUDIT_LOG_FIELD("ID")     ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" ADD CONSTRAINT AUDIT_LOG_CHANGESET_FK_USER       FOREIGN KEY ("USER_ID")          REFERENCES ' . ($opt->schema) . '.AUDIT_LOG_USER("ID")      ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     ADD CONSTRAINT AUDIT_LOG_FIELD_FK_AUDITED_TABLE  FOREIGN KEY ("AUDITED_TABLE_ID") REFERENCES ' . ($opt->schema) . '.AUDIT_LOG_TABLE("ID")     ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ADD CONSTRAINT AUDIT_LOG_ACTION_FK_AUDITED_TABLE FOREIGN KEY ("AUDITED_TABLE_ID") REFERENCES ' . ($opt->schema) . '.AUDIT_LOG_TABLE("ID")     ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    ADD CONSTRAINT AUDIT_LOG_ACTION_FK_CHANGESET     FOREIGN KEY ("CHANGESET_ID")     REFERENCES ' . ($opt->schema) . '.AUDIT_LOG_CHANGESET("ID") ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ADD CONSTRAINT AUDIT_LOG_CHANGE_FK_ACTION        FOREIGN KEY ("ACTION_ID")        REFERENCES ' . ($opt->schema) . '.AUDIT_LOG_ACTION("ID")    ON DELETE CASCADE',
+            'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGE"    ADD CONSTRAINT AUDIT_LOG_CHANGE_FK_FIELD         FOREIGN KEY ("FIELD_ID")         REFERENCES ' . ($opt->schema) . '.AUDIT_LOG_FIELD("ID")     ON DELETE CASCADE',
         );
     }
 

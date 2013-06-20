@@ -1,4 +1,28 @@
-0.5.0 - 2013/04/24
+0.5.6 - 2013/06/20
+
+    Updated:
+    - alters prefetch for User location in get_changes - MATTP
+
+0.5.5 - 2013/05/24
+
+    Updated:
+    - the get_chagnes method prefetches some extra information that would likely be needed to avoid a mass number of lookups later
+
+0.5.4 - 2013/05/08
+
+    Updated:
+    - set the relationship to User in Changeset to a left join  -- fixes Github issue #15
+
+0.5.2 - 2013/05/06
+
+    - removed utils folder from Manifest.skip so that they would be sent with package -- contains the update_reserved_columns script needed after the column name changes
+
+0.5.1 - 2013/04/30
+
+    Fixed:
+    - issue with uupdate_reserved_columns script in DB2
+
+0.5.0 - 2013/04/29
 
     Fixed:
     - quote_names is removed and not enabled by default from Audit Log
