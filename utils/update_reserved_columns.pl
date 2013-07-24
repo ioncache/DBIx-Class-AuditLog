@@ -103,7 +103,7 @@ sub db2 {
     if ( $opt->db_version && $opt->db_version =~ /8\.?/ ) {
         @sql = (
             ### DROP ALL FOREIGN KEY INDEXES
-    
+
             'DROP INDEX "' . ($opt->schema) . '"."AL_CS_IDX_U"',
             'DROP INDEX "' . ($opt->schema) . '"."AL_A_IDX_AT"',
             'DROP INDEX "' . ($opt->schema) . '"."AL_A_IDX_CS"',
@@ -171,7 +171,7 @@ sub db2 {
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_FIELD"     DROP FOREIGN KEY "AUDIT_LOG_FIELD_FK_AUDITED_TABLE"',
 
             ### ALTER TABLE STRUCTURE
-    
+
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "USER"          TO "USER_ID"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_CHANGESET" RENAME COLUMN "TIMESTAMP"     TO "CREATED_ON"',
             'ALTER TABLE "' . ($opt->schema) . '"."AUDIT_LOG_ACTION"    RENAME COLUMN "CHANGESET"     TO "CHANGESET_ID"',
@@ -211,8 +211,8 @@ sub mysql {
 
         # audit_log_changeset
         'ALTER TABLE `audit_log_changeset` DROP FOREIGN KEY `audit_log_changeset_fk_user`',
-        'ALTER TABLE `audit_log_changeset` CHANGE COLUMN `timestamp` `created_on` TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            CHANGE COLUMN `user` `user_id` INTEGER  DEFAULT NULL,
+        'ALTER TABLE `audit_log_changeset` CHANGE `timestamp` `created_on` TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CHANGE `user` `user_id` INTEGER  DEFAULT NULL,
             DROP INDEX `audit_log_changeset_idx_user`,
             ADD INDEX `audit_log_changeset_idx_user` USING BTREE(`user_id`),
             ADD CONSTRAINT `audit_log_changeset_fk_user` FOREIGN KEY `audit_log_changeset_fk_user` (`user_id`)
@@ -223,8 +223,8 @@ sub mysql {
         # audit_log_action
         'ALTER TABLE `audit_log_action` DROP FOREIGN KEY `audit_log_action_fk_audited_table`',
         'ALTER TABLE `audit_log_action` DROP FOREIGN KEY `audit_log_action_fk_changeset`',
-        'ALTER TABLE `audit_log_action` CHANGE COLUMN `changeset` `changeset_id` INTEGER  NOT NULL,
-            CHANGE COLUMN `audited_table` `audited_table_id` INTEGER  NOT NULL,
+        'ALTER TABLE `audit_log_action` CHANGE `changeset` `changeset_id` INTEGER  NOT NULL,
+            CHANGE `audited_table` `audited_table_id` INTEGER  NOT NULL,
             DROP INDEX `audit_log_action_idx_audited_table`,
             ADD INDEX `audit_log_action_idx_audited_table` USING BTREE(`audited_table_id`),
             DROP INDEX `audit_log_action_idx_changeset`,
@@ -237,14 +237,14 @@ sub mysql {
                REFERENCES `audit_log_changeset` (`id`)
                ON DELETE CASCADE
                ON UPDATE CASCADE',
-        'ALTER TABLE `audit_log_action CHANGE COLUMN `type` `action_type` VARCHAR(10) NOT NULL',
+        'ALTER TABLE `audit_log_action CHANGE `type` `action_type` VARCHAR(10) NOT NULL',
 
         # audit_log_change
         'ALTER TABLE `audit_log_change` DROP FOREIGN KEY `audit_log_change_fk_action`',
         'ALTER TABLE `audit_log_change` DROP FOREIGN KEY `audit_log_change_fk_field`',
 
-        'ALTER TABLE `audit_log_change` CHANGE COLUMN `action` `action_id` INTEGER  NOT NULL,
-            CHANGE COLUMN `field` `field_id` INTEGER  NOT NULL,
+        'ALTER TABLE `audit_log_change` CHANGE `action` `action_id` INTEGER  NOT NULL,
+            CHANGE `field` `field_id` INTEGER  NOT NULL,
             DROP INDEX `audit_log_change_idx_action`,
             ADD INDEX `audit_log_change_idx_action` USING BTREE(`action_id`),
             DROP INDEX `audit_log_change_idx_field`,
@@ -261,7 +261,7 @@ sub mysql {
         # audit_log_field
         'ALTER TABLE `audit_log_field` DROP FOREIGN KEY `audit_log_field_fk_audited_table`',
 
-        'ALTER TABLE `audit_log_field` CHANGE COLUMN `audited_table` `audited_table_id` INTEGER  NOT NULL,
+        'ALTER TABLE `audit_log_field` CHANGE `audited_table` `audited_table_id` INTEGER  NOT NULL,
             DROP INDEX `audit_log_field_idx_audited_table`,
             ADD INDEX `audit_log_field_idx_audited_table` USING BTREE(`audited_table_id`),
             ADD CONSTRAINT `audit_log_field_fk_audited_table` FOREIGN KEY `audit_log_field_fk_audited_table` (`audited_table_id`)
