@@ -17,9 +17,9 @@ __PACKAGE__->result_source_instance->view_definition(
             c.new_value,
             a.action_type,
             a.audited_row,
-            t.name as table,
-            f.name as field,
-            u.name as user
+            t.name as table_name,
+            f.name as field_name,
+            u.name as user_name
         from
             audit_log_action    a
             inner join
@@ -65,17 +65,17 @@ __PACKAGE__->add_columns(
         'is_nullable' => 0,
         'size'        => 255,
     },
-    'table' => {
+    'table_name' => {
         'data_type'   => 'varchar',
         'is_nullable' => 0,
         'size'        => 40,
     },
-    'field' => {
+    'field_name' => {
         'data_type'   => 'varchar',
         'is_nullable' => 0,
         'size'        => 40,
     },
-    'user' => {
+    'user_name' => {
         'data_type' => "varchar", 
         'is_nullable' => 1, 
         'size' => 100
