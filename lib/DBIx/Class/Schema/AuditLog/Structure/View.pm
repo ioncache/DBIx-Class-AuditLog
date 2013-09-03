@@ -48,6 +48,10 @@ __PACKAGE__->add_columns(
         'data_type'         => 'integer',
         'is_nullable'       => 0,
     },
+    'changeset_id' => {
+        'data_type'         => 'integer',
+        'is_nullable'       => 0,
+    },
     'old_value' => {
         'data_type'   => 'varchar',
         'is_nullable' => 1,
@@ -77,6 +81,16 @@ __PACKAGE__->add_columns(
         'data_type'   => 'varchar',
         'is_nullable' => 0,
         'size'        => 40,
+    },
+    'description' => {
+        'data_type'   => 'varchar',
+        'is_nullable' => 1,
+        'size'        => 255,
+    },
+    'created_on' => {
+        'data_type'     => 'timestamp',
+        'set_on_create' => 1,
+        'is_nullable'   => 0,
     },
     'user_name' => {
         'data_type' => "varchar", 
