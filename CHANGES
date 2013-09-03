@@ -1,3 +1,8 @@
+0.6.0 - 2013/09/03
+
+    New:
+    - new view 'audit_log_view / AuditLogView' added - MOSHEGOOD
+
 0.5.6 - 2013/06/20
 
     Updated:
@@ -20,7 +25,7 @@
 0.5.1 - 2013/04/30
 
     Fixed:
-    - issue with uupdate_reserved_columns script in DB2
+    - issue with update_reserved_columns script in DB2
 
 0.5.0 - 2013/04/29
 
