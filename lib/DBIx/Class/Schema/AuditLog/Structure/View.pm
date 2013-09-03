@@ -17,6 +17,9 @@ __PACKAGE__->result_source_instance->view_definition(
             c.new_value,
             a.action_type,
             a.audited_row,
+            s.id as changeset_id,
+            s.description,
+            s.created_on,
             t.name as table_name,
             f.name as field_name,
             u.name as user_name
