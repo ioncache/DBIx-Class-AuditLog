@@ -145,7 +145,7 @@ sub find_or_create_audit_log_schema_template {
 
     my $prefix = 'AuditLog';
     foreach my $audit_log_table (
-        qw< Action Change Changeset Field AuditedTable User>)
+        qw< Action Change Changeset Field AuditedTable User View >)
     {
         my $class = blessed($schema) . "::$audit_log_table";
 
