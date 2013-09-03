@@ -11,6 +11,7 @@ require DBIx::Class::Schema::AuditLog::Structure::Change;
 require DBIx::Class::Schema::AuditLog::Structure::Changeset;
 require DBIx::Class::Schema::AuditLog::Structure::Field;
 require DBIx::Class::Schema::AuditLog::Structure::User;
+require DBIx::Class::Schema::AuditLog::Structure::View;
 
 __PACKAGE__->mk_group_accessors( simple => '_current_changeset_container' );
 
