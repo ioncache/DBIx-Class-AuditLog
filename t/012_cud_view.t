@@ -29,13 +29,14 @@ $schema->txn_do(
     },
 );
 
-my $al_view = $al_schema->resultset('AuditLogView')
-    ->search( { user_name => 'TestAdminUser01' } )->first;
+my $al_view = $al_schema->resultset('AuditLogView')->search(
+    { user_name => 'TestAdminUser01' },
+    { order_by  => { -desc => 'change_id' } }
+)->first;
 
 subtest 'CREATE Tests' => sub {
     ok( $al_view, "View row exists" );
-    ok( $al_view->description eq
-            "adding new user: JohnSample",
+    ok( $al_view->description eq "adding new user: JohnSample",
         "AuditLogChangeset has correct description"
     );
     ok( $al_view->action_type eq "insert",
@@ -55,23 +56,22 @@ $schema->txn_do(
     },
 );
 
-$al_view = $al_schema->resultset('AuditLogView')
-    ->search( { user_name => 'TestAdminUser02' } )->first;
+$al_view = $al_schema->resultset('AuditLogView')->search(
+    { user_name => 'TestAdminUser02' },
+    { order_by  => { -desc => 'change_id' } }
+)->first;
 
 subtest 'UPDATE Tests' => sub {
     ok( $al_view, "View row exists" );
-    ok( $al_view->description eq
-            "updating user: JohnSample",
+    ok( $al_view->description eq "updating user: JohnSample",
         "AuditLogChangeset has correct description"
     );
     ok( $al_view->action_type eq "update",
         "AuditLogAction has correct type" );
-    ok( $al_view->old_value eq
-            'JohnSample',
+    ok( $al_view->old_value eq 'JohnSample',
         "AuditLogChange OLD value correct"
     );
-    ok( $al_view->new_value eq
-            'JaneSample',
+    ok( $al_view->new_value eq 'JaneSample',
         "AuditLogChange NEW value correct"
     );
     done_testing();
@@ -89,24 +89,23 @@ $schema->txn_do(
     },
 );
 
-$al_view = $al_schema->resultset('AuditLogView')
-    ->search( { user_name => 'TestAdminUser03' } )->first;
+$al_view
+    = $al_schema->resultset('AuditLogView')
+    ->search( { user_name => 'TestAdminUser03', field_name => 'name' },
+    { order_by => { -desc => 'change_id' } } )->first;
 
 subtest 'DELETE Tests' => sub {
     ok( $al_view, "View row exists" );
-    ok( $al_view->description eq
-            "deleting user: JaneSample",
+    ok( $al_view->description eq "deleting user: JaneSample",
         "AuditLogChangeset has correct description"
     );
     ok( $al_view->action_type eq "delete",
         "AuditLogAction has correct type" );
-    ok( $al_view->old_value eq
-            'JaneSample',
+    ok( $al_view->old_value eq 'JaneSample',
         "AuditLogChange OLD value correct"
     );
     ok( !defined $al_view->new_value,
-        "AuditLogChange NEW value correctly set to null"
-    );
+        "AuditLogChange NEW value correctly set to null" );
     done_testing();
 };
 
@@ -129,10 +128,13 @@ subtest 'DELETE Tests' => sub {
         },
     );
 
-    $al_view = $al_schema->resultset('AuditLogView')
-        ->search( { user_name => 'TestAdminUser04' } )->first;   
+    $al_view = $al_schema->resultset('AuditLogView')->search(
+        { user_name => 'TestAdminUser04' },
+        { order_by  => { -desc => 'change_id' } }
+    )->first;
 
-    ok(!$al_view, 'No audit log created when $DBIx::Class::AuditLog::enabled = 0');
+    ok( !$al_view,
+        'No audit log created when $DBIx::Class::AuditLog::enabled = 0' );
 }
 
 # Audit logging again enabled outside of scope
@@ -152,13 +154,14 @@ $schema->txn_do(
         user_id     => "TestAdminUser05",
     },
 );
-    
-$al_view = $al_schema->resultset('AuditLogView')
-    ->search( { user_name => 'TestAdminUser05' } )->first;   
 
-ok( $al_view->new_value eq
-        'Damian Conway',
-    "Audit Logging again enabled outside of scoped local enabled = 0"
-);
+$al_view = $al_schema->resultset('AuditLogView')->search(
+    { user_name => 'TestAdminUser05' },
+    { order_by  => { -desc => 'change_id' } }
+)->first;
+
+ok( $al_view->new_value eq 'Damian Conway',
+    "Audit Logging again enabled outside of scoped local enabled = 0" );
 
 done_testing();
+
