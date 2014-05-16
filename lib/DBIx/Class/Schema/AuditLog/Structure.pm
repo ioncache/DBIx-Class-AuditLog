@@ -203,7 +203,7 @@ sub get_changes {
             $criteria->{field_id} = $field ? $field->id : -1;
         }
 
-        my $changes = $actions->search_related(
+        my $changes = $actions->search_related_rs(
             'Change',
             $criteria,
             {   order_by   => { "-$change_order" => 'me.id' },

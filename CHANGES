@@ -1,3 +1,11 @@
+0.6.1 release - 2014/05/16
+
+    New:
+    - the get_changes method should now always return a resultset
+
+    Fixed:
+    - some tests fixed that were inadvertantly relying on hash order not being random
+
 0.6.0 - 2013/09/03
 
     New:
