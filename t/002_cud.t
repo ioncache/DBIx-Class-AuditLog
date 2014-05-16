@@ -118,8 +118,11 @@ subtest 'DELETE Tests' => sub {
     );
     ok( $al_user->Changeset->first->Action->first->action_type eq "delete",
         "AuditLogAction has correct type" );
-    ok( $al_user->Changeset->first->Action->first->Change->first->old_value eq
-            'JaneSample',
+    my $field = $al_schema->resultset('AuditLogField')
+        ->search( { name => 'name' } )->first;
+    ok( $al_user->Changeset->first->Action->first->Change->search(
+            { field_id => $field->id }
+            )->first->old_value eq 'JaneSample',
         "AuditLogChange OLD value correct"
     );
     ok( !defined $al_user->Changeset->first->Action->first->Change->first
@@ -149,7 +152,7 @@ subtest 'DELETE Tests' => sub {
     );
 
     $al_user = $al_schema->resultset('AuditLogUser')
-        ->search( { name => 'TestAdminUser04' } )->first;   
+        ->search( { name => 'TestAdminUser04' } )->first;
 
     ok(!$al_user, 'No audit log created when $DBIx::Class::AuditLog::enabled = 0');
 }
@@ -171,9 +174,9 @@ $schema->txn_do(
         user_id     => "TestAdminUser05",
     },
 );
-    
+
 $al_user = $al_schema->resultset('AuditLogUser')
-    ->search( { name => 'TestAdminUser05' } )->first;   
+    ->search( { name => 'TestAdminUser05' } )->first;
 
 ok( $al_user->Changeset->first->Action->first->Change->first->new_value eq
         'Damian Conway',
