@@ -181,7 +181,7 @@ sub get_changes {
         if $field_name;
 
     my $changeset_criteria = {};
-    $changeset_criteria->{created_on} = $timestamp if $timestamp;
+    $changeset_criteria->{'me.created_on'} = $timestamp if $timestamp;
     my $changesets = $self->resultset('AuditLogChangeset')->search_rs(
         $changeset_criteria
     );
