@@ -1,3 +1,7 @@
+0.6.2 release - 2014/08/12
+    Fixed:
+    - issue with the 'created_on' option of get_changes method - DALMER
+
 0.6.1 release - 2014/05/16
 
     New:
