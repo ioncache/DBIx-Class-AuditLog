@@ -159,8 +159,9 @@ sub _force_audit {
     return unless $self->has_column($column);
 
     my $info = $self->column_info($column);
-    return defined $info->{force_audit_log_column};
 
+    return defined $info->{force_audit_log_column}
+        && $info->{force_audit_log_column};
 }
 
 sub _do_audit {
