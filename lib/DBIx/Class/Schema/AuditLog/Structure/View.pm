@@ -13,11 +13,11 @@ __PACKAGE__->result_source_instance->view_definition(
     q{
         select 
             c.id as change_id,
+            s.id as changeset_id,
             c.old_value,
             c.new_value,
             a.action_type,
             a.audited_row,
-            s.id as changeset_id,
             s.description,
             s.created_on,
             t.name as table_name,
@@ -72,16 +72,6 @@ __PACKAGE__->add_columns(
         'is_nullable' => 0,
         'size'        => 255,
     },
-    'table_name' => {
-        'data_type'   => 'varchar',
-        'is_nullable' => 0,
-        'size'        => 40,
-    },
-    'field_name' => {
-        'data_type'   => 'varchar',
-        'is_nullable' => 0,
-        'size'        => 40,
-    },
     'description' => {
         'data_type'   => 'varchar',
         'is_nullable' => 1,
@@ -91,6 +81,16 @@ __PACKAGE__->add_columns(
         'data_type'     => 'timestamp',
         'set_on_create' => 1,
         'is_nullable'   => 0,
+    },
+    'table_name' => {
+        'data_type'   => 'varchar',
+        'is_nullable' => 0,
+        'size'        => 40,
+    },
+    'field_name' => {
+        'data_type'   => 'varchar',
+        'is_nullable' => 0,
+        'size'        => 40,
     },
     'user_name' => {
         'data_type' => "varchar", 
