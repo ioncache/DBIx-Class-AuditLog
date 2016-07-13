@@ -154,9 +154,14 @@ sub _store_changes {
 sub _force_audit {
     my ( $self, $column ) = @_;
 
-    my $info = $self->column_info($column);
-    return defined $info->{force_audit_log_column};
+    ## make sure that this is an actual column, and is not
+    ## a correlated column
+    return unless $self->has_column($column);
 
+    my $info = $self->column_info($column);
+
+    return defined $info->{force_audit_log_column}
+        && $info->{force_audit_log_column};
 }
 
 sub _do_audit {
