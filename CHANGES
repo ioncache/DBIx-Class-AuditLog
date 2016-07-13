@@ -1,3 +1,7 @@
+0.6.3 release - 2016-08-13
+    Fixed:
+    - deploy script generates incorrect audit_log_view #20 - GETTY
+
 0.6.2 release - 2014/08/12
     Fixed:
     - issue with the 'created_on' option of get_changes method - DALMER
