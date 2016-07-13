@@ -1,3 +1,7 @@
+0.6.4 release - 2016-08-13
+    Fixed:
+    - _force_audit method is not checking for whether the column is a valid column #23 - ROMANF
+
 0.6.3 release - 2016-08-13
     Fixed:
     - deploy script generates incorrect audit_log_view #20 - GETTY
