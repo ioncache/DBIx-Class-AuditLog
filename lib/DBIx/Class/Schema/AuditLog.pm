@@ -60,24 +60,24 @@ sub txn_do {
     my $changeset_data = $args[0];
 
     my $current_changeset = $audit_log_schema->_current_changeset;
-    if ( !$current_changeset ) {
-        my $current_changeset_ref
-            = $audit_log_schema->_current_changeset_container;
+    my $parent_id = $current_changeset ? $current_changeset : undef;
 
-        unless ($current_changeset_ref) {
-            $current_changeset_ref = {};
-            $audit_log_schema->_current_changeset_container(
-                $current_changeset_ref);
-        }
+    my $current_changeset_ref = $audit_log_schema->_current_changeset_container;
 
-        $code = sub {
-            # creates local variables in the transaction scope to store
-            # the changset args, and the changeset id
-            local $current_changeset_ref->{args}      = $args[0];
-            local $current_changeset_ref->{changeset} = '';
-            $user_code->(@_);
-        };
+    unless ($current_changeset_ref) {
+        $current_changeset_ref = {};
+        $audit_log_schema->_current_changeset_container(
+            $current_changeset_ref);
     }
+
+    $code = sub {
+        # creates local variables in the transaction scope to store
+        # the changset args, and the changeset id
+        local $current_changeset_ref->{args}        = $args[0];
+        local $current_changeset_ref->{changeset}   = '';
+        $current_changeset_ref->{args}->{parent_id} = $parent_id;
+        $user_code->(@_);
+    };
 
     if ( $audit_log_schema->storage != $self->storage ) {
         my $inner_code = $code;
@@ -103,7 +103,7 @@ sub audited_sources{
 
 =head2 audited_source
 
-=over 
+=over
 
 =item Arguments: $source_name
 

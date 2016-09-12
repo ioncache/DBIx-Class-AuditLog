@@ -82,11 +82,14 @@ sub audit_log_create_changeset {
             ->find_or_create( { name => $user_id } );
 
         $changeset = $user->create_related( 'Changeset',
-            { description => $changeset_data->{description} } );
+            { description => $changeset_data->{description},
+              parent_id   => $changeset_data->{parent_id} }
+        );
     }
     else {
         $changeset = $self->resultset('AuditLogChangeset')
-            ->create( { description => $changeset_data->{description} } );
+            ->create( { description => $changeset_data->{description},
+                        parent_id   => $changeset_data->{parent_id} } );
     }
 
     return $changeset;
